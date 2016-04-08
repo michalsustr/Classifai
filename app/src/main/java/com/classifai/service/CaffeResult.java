@@ -53,6 +53,10 @@ public class CaffeResult {
         return stringBuffer.toString();
     }
 
+    public Float getFPS() {
+        return (float) (1000.0 / executionTime);
+    }
+
 
     private class FloatIndexComparator implements Comparator<Integer>
     {

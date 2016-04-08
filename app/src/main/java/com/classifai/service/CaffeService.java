@@ -32,6 +32,7 @@ public class CaffeService {
         System.loadLibrary("caffe_jni");
     }
 
+    private CaffeResult lastResult;
 
 
     public CaffeService(String caffeModelDeploy, String caffeModelWeights, String caffeModelLabels) {
@@ -95,6 +96,11 @@ public class CaffeService {
         cnnTask.execute(imgPath);
     }
 
+    public Float getFPSProcessingPower() {
+        if(lastResult == null) return null;
+        return lastResult.getFPS();
+    }
+
     private class CNNTask extends AsyncTask<String, Void, CaffeResult> {
         private CNNListener listener;
         private long startTime;
@@ -118,6 +124,7 @@ public class CaffeService {
             Log.i(LOG_TAG, String.format("elapsed wall time: %d ms", executionTime));
             Log.i(LOG_TAG, "Result: "+result);
 
+            lastResult = result;
             result.setExecutionTime(executionTime);
             listener.onRecognitionCompleted(result);
             super.onPostExecute(result);

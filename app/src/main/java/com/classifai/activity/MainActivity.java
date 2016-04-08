@@ -41,10 +41,11 @@ public class MainActivity extends Activity implements CNNListener {
     private ImageView ivCaptured;
     private TextView tvLabel;
     private TextView execLabel;
+    private TextView fpsLabel;
     private Uri fileUri;
     private ProgressDialog dialog;
-    private Bitmap bmp;
 
+    private Bitmap bmp;
     private CaffeService caffeService;
 
     @Override
@@ -57,6 +58,7 @@ public class MainActivity extends Activity implements CNNListener {
         ivCaptured = (ImageView) findViewById(R.id.ivCaptured);
         tvLabel = (TextView) findViewById(R.id.tvLabel);
         execLabel = (TextView) findViewById(R.id.execLabel);
+        fpsLabel = (TextView) findViewById(R.id.fpsLabel);
 
         btnCamera = (Button) findViewById(R.id.btnCamera);
         btnCamera.setOnClickListener(new Button.OnClickListener() {
@@ -133,6 +135,7 @@ public class MainActivity extends Activity implements CNNListener {
         ivCaptured.setImageBitmap(bmp);
         tvLabel.setText(show);
         execLabel.setText("Execution time: "+result.getExecutionTime()+ "ms");
+        fpsLabel.setText("FPS: "+String.format("%.2f", result.getFPS()));
         btnCamera.setEnabled(true);
         btnSelect.setEnabled(true);
 

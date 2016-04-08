@@ -49,5 +49,11 @@
         android:layout_height="wrap_content"
         android:background="#88FFFFFF"
         android:layout_marginTop="20dp" />
+    <TextView
+        android:id="@+id/fpsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#88FFFFFF"
+        android:layout_marginTop="20dp" />
 
 </LinearLayout>
