@@ -7,10 +7,8 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -18,21 +16,14 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.classifai.service.CNNListener;
-import com.classifai.utils.FloatIndexComparator;
 import com.classifai.R;
-import com.sh1r0.caffe_android_lib.CaffeMobile;
+import com.classifai.service.CNNListener;
+import com.classifai.service.CaffeResult;
+import com.classifai.service.CaffeService;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import java.util.Scanner;
 
 
 public class MainActivity extends Activity implements CNNListener {
@@ -40,10 +31,10 @@ public class MainActivity extends Activity implements CNNListener {
     private static final int REQUEST_IMAGE_CAPTURE = 100;
     private static final int REQUEST_IMAGE_SELECT = 200;
     public static final int MEDIA_TYPE_IMAGE = 1;
+
     private static final String CAFFE_MODEL_DEPLOY  = "/storage/sdcard0/caffe/gnet_full.prototxt";
     private static final String CAFFE_MODEL_WEIGHTS = "/storage/sdcard0/caffe/gnet.caffemodel";
     private static final String CAFFE_MODEL_LABELS = "/storage/sdcard0/caffe/gnet.txt";
-    private static String[] RECOGNITION_CLASSES;
 
     private Button btnCamera;
     private Button btnSelect;
@@ -53,27 +44,15 @@ public class MainActivity extends Activity implements CNNListener {
     private Uri fileUri;
     private ProgressDialog dialog;
     private Bitmap bmp;
-    private CaffeMobile caffeMobile;
 
-    static {
-        System.loadLibrary("caffe");
-        System.loadLibrary("caffe_jni");
-    }
+    private CaffeService caffeService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(LOG_TAG, "created");
-        // check model existence
-        if(!new File(CAFFE_MODEL_DEPLOY).exists()
-            || !new File(CAFFE_MODEL_WEIGHTS).exists()
-            || !new File(CAFFE_MODEL_LABELS).exists()
-        ) {
-            throw new RuntimeException("caffe model files do not exist, at "+CAFFE_MODEL_DEPLOY+" and "+CAFFE_MODEL_WEIGHTS);
-        }
-
-
         setContentView(R.layout.activity_main);
+
 
         ivCaptured = (ImageView) findViewById(R.id.ivCaptured);
         tvLabel = (TextView) findViewById(R.id.tvLabel);
@@ -99,26 +78,7 @@ public class MainActivity extends Activity implements CNNListener {
             }
         });
 
-        // TODO: implement a splash screen(?
-        caffeMobile = new CaffeMobile();
-        caffeMobile.setNumThreads(4);
-        caffeMobile.loadModel(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS);
-
-        float[] meanValues = {104, 117, 123};
-        caffeMobile.setMean(meanValues);
-
-        try {
-            InputStream is = new FileInputStream(new File(CAFFE_MODEL_LABELS));
-            Scanner sc = new Scanner(is);
-            List<String> lines = new ArrayList<String>();
-            while (sc.hasNextLine()) {
-                final String temp = sc.nextLine();
-                lines.add(temp.substring(temp.indexOf(" ") + 1));
-            }
-            RECOGNITION_CLASSES = lines.toArray(new String[0]);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        caffeService = new CaffeService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);
     }
 
     @Override
@@ -144,9 +104,7 @@ public class MainActivity extends Activity implements CNNListener {
             Log.d(LOG_TAG, String.valueOf(bmp.getWidth()));
 
             dialog = ProgressDialog.show(MainActivity.this, "Predicting...", "Wait for one sec...", true);
-
-            CNNTask cnnTask = new CNNTask(MainActivity.this);
-            cnnTask.execute(imgPath);
+            caffeService.classifyImage(imgPath, this);
         } else {
             btnCamera.setEnabled(true);
             btnSelect.setEnabled(true);
@@ -161,48 +119,20 @@ public class MainActivity extends Activity implements CNNListener {
         tvLabel.setText("");
     }
 
-    private class CNNTask extends AsyncTask<String, Void, float[]> {
-        private CNNListener listener;
-        private long startTime;
 
-        public CNNTask(CNNListener listener) {
-            this.listener = listener;
-        }
-
-        @Override
-        protected float[] doInBackground(String... strings) {
-            startTime = SystemClock.uptimeMillis();
-            float[] scores = caffeMobile.getConfidenceScore(strings[0]);
-            return scores;
-        }
-
-        @Override
-        protected void onPostExecute(float[] scores) {
-            long executionTime = SystemClock.uptimeMillis() - startTime;
-            Log.i(LOG_TAG, String.format("elapsed wall time: %d ms", executionTime));
-            listener.onTaskCompleted(scores, executionTime);
-            super.onPostExecute(scores);
-        }
-    }
 
     @Override
-    public void onTaskCompleted(float[] scores, long executionTime) {
-        // find max
-        int maxIdx = 0;
-        String result = "";
-        FloatIndexComparator comparator = new FloatIndexComparator(scores);
-        Integer[] indexes = comparator.createIndexArray();
-        Arrays.sort(indexes, comparator);
+    public void onRecognitionCompleted(CaffeResult result) {
+        Integer[] top5 = result.getTopKIndices(5);
+        StringBuilder show = new StringBuilder();
         for (int i = 0; i < 5; i++) {
-            result += String.format("%.2f", scores[indexes[i]]) + " " + RECOGNITION_CLASSES[indexes[i]] + "\n";
-        }
-        for (int i = 0; i < scores.length; i++) {
-            Log.i(LOG_TAG, "onTaskCompleted score: "+i+" "+indexes[i]+" "+ RECOGNITION_CLASSES[indexes[i]]+ " is "+scores[indexes[i]]);
+            show.append(String.format("%.2f", result.getScore(top5[i])))
+                    .append(" ").append(result.getLabel(top5[i])).append("\n");
         }
 
         ivCaptured.setImageBitmap(bmp);
-        tvLabel.setText(result);
-        execLabel.setText("Execution time: "+executionTime+ "ms");
+        tvLabel.setText(show);
+        execLabel.setText("Execution time: "+result.getExecutionTime()+ "ms");
         btnCamera.setEnabled(true);
         btnSelect.setEnabled(true);
 
