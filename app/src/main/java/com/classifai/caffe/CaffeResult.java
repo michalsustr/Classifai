@@ -1,4 +1,4 @@
-package com.classifai.service;
+package com.classifai.caffe;
 
 import java.util.Arrays;
 import java.util.Comparator;

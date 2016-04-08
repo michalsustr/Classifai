@@ -1,4 +1,4 @@
-package com.classifai.service;
+package com.classifai.caffe;
 
 import android.os.AsyncTask;
 import android.os.SystemClock;
