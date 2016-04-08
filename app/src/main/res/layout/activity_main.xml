@@ -8,8 +8,7 @@
     <TextureView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/preview_surface"
-        android:background="#FFFFFFFF"/>
+        android:id="@+id/preview_surface" />
 
     <TextView
         android:id="@+id/scoreLabel"

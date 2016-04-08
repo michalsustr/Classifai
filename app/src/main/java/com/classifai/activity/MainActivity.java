@@ -5,6 +5,8 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -32,6 +34,7 @@ public class MainActivity extends Activity implements CNNListener {
     private TextView fpsLabel;
     private TextView scoreLabel;
     private ProgressBar computingProgress;
+    private Button lightBtn;
     private TextureView textureView;
 
     private CaffeService caffeService;
@@ -46,11 +49,18 @@ public class MainActivity extends Activity implements CNNListener {
         scoreLabel = (TextView) findViewById(R.id.scoreLabel);
         fpsLabel   = (TextView) findViewById(R.id.fpsLabel);
         computingProgress = (ProgressBar) findViewById(R.id.computing_progress);
+        lightBtn = (Button) findViewById(R.id.btnLight);
         textureView = (TextureView) findViewById(R.id.preview_surface);
 
         caffeService = new CaffeService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);
 
-        openCamera();
+        lightBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openCamera();
+            }
+        });
+
     }
 
     private void openCamera() {
