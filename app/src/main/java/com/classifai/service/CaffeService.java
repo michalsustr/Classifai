@@ -81,9 +81,18 @@ public class CaffeService {
     }
 
     public void classifyImage(String imgPath, CNNListener result) {
+        // there might be already a running instance, if yes cancel it
+        if(cnnTask != null) {
+            if(cnnTask.getStatus() == AsyncTask.Status.RUNNING
+            || cnnTask.getStatus() == AsyncTask.Status.PENDING) {
+                cnnTask.cancel(true);
+                Log.i(LOG_TAG, "classifyImage asyncTask canceled");
+            }
+            cnnTask = null;
+        }
+
         cnnTask = new CNNTask(result);
         cnnTask.execute(imgPath);
-//        cnnTask.
     }
 
     private class CNNTask extends AsyncTask<String, Void, CaffeResult> {
@@ -107,7 +116,7 @@ public class CaffeService {
         protected void onPostExecute(CaffeResult result) {
             long executionTime = SystemClock.uptimeMillis() - startTime;
             Log.i(LOG_TAG, String.format("elapsed wall time: %d ms", executionTime));
-            Log.i(LOG_TAG, result.toString());
+            Log.i(LOG_TAG, "Result: "+result);
 
             result.setExecutionTime(executionTime);
             listener.onRecognitionCompleted(result);

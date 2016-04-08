@@ -48,7 +48,7 @@ public class CaffeResult {
         StringBuilder stringBuffer = new StringBuilder();
         for (int i = 0; i< confidenceScore.length; i++) {
             stringBuffer.append(class2label[i])
-                .append(": ").append(String.format("%.2f", confidenceScore[i]));
+                .append(": ").append(String.format("%.2f", confidenceScore[i])).append("; ");
         }
         return stringBuffer.toString();
     }
