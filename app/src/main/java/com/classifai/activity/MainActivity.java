@@ -10,16 +10,16 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.classifai.R;
-import com.classifai.caffe.CNNListener;
-import com.classifai.caffe.CaffeResult;
-import com.classifai.caffe.CaffeService;
+import com.classifai.recognition.RecognitionListener;
+import com.classifai.recognition.RecognitionResult;
+import com.classifai.recognition.RecognitionService;
 import com.classifai.camera.Camera;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class MainActivity extends Activity implements CNNListener {
+public class MainActivity extends Activity implements RecognitionListener {
     private static final String LOG_TAG = "MainActivity";
 
     private static final String CAFFE_MODEL_DEPLOY  = "/storage/sdcard0/caffe/gnet_full.prototxt";
@@ -33,7 +33,7 @@ public class MainActivity extends Activity implements CNNListener {
     private TextureView textureView;
     private RelativeLayout layout;
 
-    private CaffeService caffeService;
+    private RecognitionService caffeService;
     private Camera camera;
 
     @Override
@@ -49,7 +49,7 @@ public class MainActivity extends Activity implements CNNListener {
         textureView = (TextureView) findViewById(R.id.preview_surface);
         layout = (RelativeLayout)  findViewById(R.id.layout);
 
-        caffeService = new CaffeService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);
+        caffeService = new RecognitionService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);
         camera = new Camera(this, textureView);
     }
 
@@ -81,7 +81,7 @@ public class MainActivity extends Activity implements CNNListener {
     }
 
     @Override
-    public void onRecognitionCompleted(CaffeResult result) {
+    public void onRecognitionCompleted(RecognitionResult result) {
         Integer[] top5 = result.getTopKIndices(5);
         StringBuilder show = new StringBuilder();
         for (int i = 0; i < 5; i++) {
