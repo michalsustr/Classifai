@@ -1,27 +1,22 @@
 package com.classifai.activity;
 
 import android.app.Activity;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.TextureView;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.classifai.R;
 import com.classifai.caffe.CNNListener;
 import com.classifai.caffe.CaffeResult;
 import com.classifai.caffe.CaffeService;
-import com.ragnarok.rxcamera.RxCamera;
-import com.ragnarok.rxcamera.config.RxCameraConfig;
-import com.ragnarok.rxcamera.config.RxCameraConfigChooser;
+import com.classifai.camera.Camera;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MainActivity extends Activity implements CNNListener {
@@ -36,9 +31,10 @@ public class MainActivity extends Activity implements CNNListener {
     private ProgressBar computingProgress;
     private Button lightBtn;
     private TextureView textureView;
+    private RelativeLayout layout;
 
     private CaffeService caffeService;
-    private RxCamera camera;
+    private Camera camera;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,59 +47,37 @@ public class MainActivity extends Activity implements CNNListener {
         computingProgress = (ProgressBar) findViewById(R.id.computing_progress);
         lightBtn = (Button) findViewById(R.id.btnLight);
         textureView = (TextureView) findViewById(R.id.preview_surface);
+        layout = (RelativeLayout)  findViewById(R.id.layout);
 
         caffeService = new CaffeService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);
-
-        lightBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openCamera();
-            }
-        });
-
+        camera = new Camera(this, textureView);
     }
 
-    private void openCamera() {
-        RxCameraConfig config = RxCameraConfigChooser.obtain().
-                useBackCamera().
-                setAutoFocus(true).
-                setPreferPreviewFrameRate(15, 30).
-                setPreferPreviewSize(new Point(640, 480)).
-                setHandleSurfaceEvent(true).
-                get();
-        Log.d(LOG_TAG, "config: " + config);
-        RxCamera.open(this, config).flatMap(new Func1<RxCamera, Observable<RxCamera>>() {
-            @Override
-            public Observable<RxCamera> call(RxCamera rxCamera) {
-                Log.d(LOG_TAG, "isopen: " + rxCamera.isOpenCamera() + ", thread: " + Thread.currentThread());
-                camera = rxCamera;
-                return rxCamera.bindTexture(textureView);
-            }
-        }).flatMap(new Func1<RxCamera, Observable<RxCamera>>() {
-            @Override
-            public Observable<RxCamera> call(RxCamera rxCamera) {
-                Log.d(LOG_TAG, "isbindsurface: " + rxCamera.isBindSurface() + ", thread: " + Thread.currentThread());
-                return rxCamera.startPreview();
-            }
-        }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<RxCamera>() {
-            @Override
-            public void onCompleted() {
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
 
-            }
-
+        // This is kind of hacky, but I don't know how to do it otherwise to initialize
+        // the camera so the stream can be viewed.
+        // Seems that the camera cannot render into textureview right away and
+        // something needs to be initialized first, but I don't know what is the event
+        // I should subscribe to.
+        //
+        // I tried OnGlobalLayoutListener on layout.getViewTreeObserver but it didn't show up
+        // although logs show that the camera is streaming...
+        // TODO: find better solution
+        new Timer().schedule(new TimerTask() {
             @Override
-            public void onError(Throwable e) {
-                Log.e(LOG_TAG, "open camera error: " + e.getMessage());
+            public void run() {
+                camera.openCamera();
             }
+        }, 100);
+    }
 
-            @Override
-            public void onNext(final RxCamera rxCamera) {
-                camera = rxCamera;
-                Log.d(LOG_TAG, "open camera success: " + camera);
-            }
-        });
-
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        camera.closeCamera();
     }
 
     @Override
