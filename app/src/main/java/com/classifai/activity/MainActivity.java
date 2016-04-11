@@ -1,7 +1,6 @@
 package com.classifai.activity;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
@@ -34,13 +33,10 @@ public class MainActivity extends Activity implements RecognitionListener {
     private Button lightBtn;
     private TextureView textureView;
     private RelativeLayout layout;
+    private SurfaceView alphaInner;
 
     private RecognitionService caffeService;
     private Camera camera;
-    private SurfaceView top;
-    private SurfaceView left;
-    private SurfaceView right;
-    private SurfaceView bottom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,19 +50,6 @@ public class MainActivity extends Activity implements RecognitionListener {
         lightBtn = (Button) findViewById(R.id.btnLight);
         textureView = (TextureView) findViewById(R.id.preview_surface);
         layout = (RelativeLayout)  findViewById(R.id.layout);
-
-        top = (SurfaceView) findViewById(R.id.alpha_top);
-        left = (SurfaceView) findViewById(R.id.alpha_left);
-        right = (SurfaceView) findViewById(R.id.alpha_right);
-        bottom = (SurfaceView) findViewById(R.id.alpha_bottom);
-        top.setAlpha(0.2f);
-        left.setAlpha(0.2f);
-        right.setAlpha(0.2f);
-        bottom.setAlpha(0.2f);
-        top.setBackgroundColor(Color.RED);
-        left.setBackgroundColor(Color.RED);
-        right.setBackgroundColor(Color.RED);
-        bottom.setBackgroundColor(Color.RED);
 
         caffeService = new RecognitionService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);
         camera = new Camera(this, textureView);

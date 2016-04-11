@@ -35,7 +35,7 @@ public class Camera {
                 useBackCamera().
                 setAutoFocus(true).
                 setPreferPreviewFrameRate(15, 30).
-                setPreferPreviewSize(new Point(640, 480)).
+                setPreferPreviewSize(new Point(456, 456)).
                 setHandleSurfaceEvent(true).
                 get();
         Log.d(LOG_TAG, "config: " + config);
