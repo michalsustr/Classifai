@@ -55,10 +55,11 @@ public class MainActivity extends Activity implements RecognitionListener {
         camera = new Camera(this, textureView);
     }
 
+
+
     @Override
     protected void onPostResume() {
         super.onPostResume();
-
         // This is kind of hacky, but I don't know how to do it otherwise to initialize
         // the camera so the stream can be viewed.
         // Seems that the camera cannot render into textureview right away and

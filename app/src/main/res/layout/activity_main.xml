@@ -7,14 +7,14 @@
     android:id="@+id/layout">
 
     <TextureView
-        android:layout_width="456px"
-        android:layout_height="456px"
+        android:layout_width="656px"
+        android:layout_height="656px"
         android:layout_centerInParent="true"
         android:id="@+id/preview_surface" />
 
     <ImageView
-        android:layout_width="456px"
-        android:layout_height="456px"
+        android:layout_width="656px"
+        android:layout_height="656px"
         android:background="@drawable/alpha_cover"
         android:layout_centerInParent="true"
         android:id="@+id/alpha"
