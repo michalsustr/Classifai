@@ -27,7 +27,7 @@
         android:layout_marginTop="20dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:text="0.95 kočka"
+        android:text="0.95 kočka\n0.02 tiger\n0.01 lev"
         />
 
     <TextView
@@ -38,10 +38,11 @@
         android:layout_marginLeft="20dp"
         android:gravity="left"
         android:layout_alignParentBottom="true"
+        android:textSize="20dp"
         android:text="FPS: 20"
         android:layout_alignParentLeft="true" />
 
-    <Button
+    <ImageButton
         android:id="@+id/btnLight"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -49,7 +50,8 @@
         android:layout_centerHorizontal="true"
         android:gravity="center_horizontal"
         android:layout_marginBottom="20dp"
-        android:text="Light" />
+        android:background="@drawable/off"
+        android:onClick="onLightButtonClicked"/>
 
     <ProgressBar
         android:indeterminate="true"

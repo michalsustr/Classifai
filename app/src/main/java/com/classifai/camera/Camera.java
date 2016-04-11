@@ -81,4 +81,56 @@ public class Camera {
             });
         }
     }
+
+    public void turnLightOn() {
+        if (!checkCamera()) {
+            return;
+        }
+//        camera.action().flashAction(true).subscribe(new Subscriber<RxCamera>() {
+//            @Override
+//            public void onCompleted() {
+//
+//            }
+//
+//            @Override
+//            public void onError(Throwable e) {
+//                Log.e(LOG_TAG, "open flash error: " + e.getMessage());
+//            }
+//
+//            @Override
+//            public void onNext(RxCamera rxCamera) {
+//                Log.d(LOG_TAG, "open flash");
+//            }
+//        });
+    }
+
+    public void turnLightOff() {
+        if (!checkCamera()) {
+            return;
+        }
+//        camera.action().flashAction(false).subscribe(new Subscriber<RxCamera>() {
+//            @Override
+//            public void onCompleted() {
+//
+//            }
+//
+//            @Override
+//            public void onError(Throwable e) {
+//                Log.e(LOG_TAG, "close flash error: " + e.getMessage());
+//            }
+//
+//            @Override
+//            public void onNext(RxCamera rxCamera) {
+//                Log.d(LOG_TAG, "close flash");
+//            }
+//        });
+    }
+
+    private boolean checkCamera() {
+//        if (camera == null || !camera.isOpenCamera()) {
+//            return false;
+//        }
+//        return true;
+        return true;
+    }
 }

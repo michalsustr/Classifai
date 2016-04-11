@@ -5,7 +5,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.TextureView;
-import android.widget.Button;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -30,13 +31,15 @@ public class MainActivity extends Activity implements RecognitionListener {
     private TextView fpsLabel;
     private TextView scoreLabel;
     private ProgressBar computingProgress;
-    private Button lightBtn;
+    private ImageButton lightBtn;
     private TextureView textureView;
     private RelativeLayout layout;
     private SurfaceView alphaInner;
 
     private RecognitionService caffeService;
     private Camera camera;
+
+    private Boolean lightOn = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +50,7 @@ public class MainActivity extends Activity implements RecognitionListener {
         scoreLabel = (TextView) findViewById(R.id.scoreLabel);
         fpsLabel   = (TextView) findViewById(R.id.fpsLabel);
         computingProgress = (ProgressBar) findViewById(R.id.computing_progress);
-        lightBtn = (Button) findViewById(R.id.btnLight);
+        lightBtn = (ImageButton) findViewById(R.id.btnLight);
         textureView = (TextureView) findViewById(R.id.preview_surface);
         layout = (RelativeLayout)  findViewById(R.id.layout);
 
@@ -97,5 +100,19 @@ public class MainActivity extends Activity implements RecognitionListener {
 //        computingProgress.getIndeterminateDrawable()
 //            .setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
 
+    }
+
+    public void onLightButtonClicked(View view) {
+        if(lightOn) {
+            Log.d(LOG_TAG, "onLightButtonClicked turn off");
+            lightOn = false;
+            camera.turnLightOff();
+            lightBtn.setBackground(getDrawable(R.drawable.off));
+        } else {
+            lightOn = true;
+            Log.d(LOG_TAG, "onLightButtonClicked turn on");
+            camera.turnLightOn();
+            lightBtn.setBackground(getDrawable(R.drawable.on));
+        }
     }
 }
