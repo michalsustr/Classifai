@@ -6,9 +6,47 @@
     android:id="@+id/layout">
 
     <TextureView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/preview_surface" />
+        android:layout_width="456px"
+        android:layout_height="456px"
+        android:layout_centerInParent="true"
+        android:id="@+id/preview_surface">
+
+    </TextureView>
+
+    <RelativeLayout
+        android:layout_width="456px"
+        android:layout_height="456px"
+        android:layout_centerInParent="true">
+
+        <SurfaceView
+            android:layout_width="456px"
+            android:layout_height="100px"
+            android:layout_alignParentTop="true"
+            android:id="@+id/alpha_top"
+            />
+
+        <SurfaceView
+            android:layout_width="100px"
+            android:layout_height="256px"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:id="@+id/alpha_left"/>
+
+        <SurfaceView
+            android:layout_width="100px"
+            android:layout_height="256px"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:id="@+id/alpha_right"/>
+
+        <SurfaceView
+            android:layout_width="456px"
+            android:layout_height="100px"
+            android:layout_alignParentBottom="true"
+            android:id="@+id/alpha_bottom"/>
+
+    </RelativeLayout>
+
 
     <TextView
         android:id="@+id/scoreLabel"
