@@ -1,4 +1,4 @@
-package com.classifai.recognition;
+package com.classifai.tools.recognition;
 
 import java.util.Arrays;
 import java.util.Comparator;

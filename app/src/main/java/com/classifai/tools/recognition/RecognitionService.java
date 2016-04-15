@@ -1,4 +1,4 @@
-package com.classifai.recognition;
+package com.classifai.tools.recognition;
 
 import android.os.AsyncTask;
 import android.os.SystemClock;

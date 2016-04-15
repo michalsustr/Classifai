@@ -1,4 +1,4 @@
-package com.classifai.camera;
+package com.classifai.tools.camera;
 
 import android.content.Context;
 import android.graphics.ImageFormat;
@@ -14,8 +14,6 @@ import com.ragnarok.rxcamera.config.RxCameraConfig;
 import com.ragnarok.rxcamera.config.RxCameraConfigChooser;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -173,20 +171,18 @@ public class Camera {
     }
 
 
-    public void snapshot() {
-        Log.d(LOG_TAG, "try snapshot");
+    public void takeSnapshot(final CameraSnapshotListener listener) {
+        Log.d(LOG_TAG, "try takeSnapshot");
 
         android.hardware.Camera.Size mSize = camera.getNativeCamera().getParameters().getPreviewSize();
         final int nativeWidth = mSize.width;
         final int nativeHeight = mSize.height;
 
-        Log.d(LOG_TAG, "size of preview: "+nativeWidth+" "+nativeHeight);
-
         camera.request().oneShotRequest().subscribe(new Action1<RxCameraData>() {
             @Override
             public void call(RxCameraData rxCameraData) {
-                Log.d(LOG_TAG, "call snapshot");
-                Log.d(LOG_TAG, "data " + rxCameraData.cameraData.length);
+                Log.d(LOG_TAG, "call takeSnapshot");
+                Log.d(LOG_TAG, "data of length " + rxCameraData.cameraData.length);
                 // convert to something normal than the weird camera format, and get proper capture square
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 YuvImage yuv = new YuvImage(rxCameraData.cameraData, ImageFormat.YUY2, nativeWidth, nativeHeight, null);
@@ -198,16 +194,7 @@ public class Camera {
                 yuv.compressToJpeg(new Rect(offsetA, offsetB, cropW+offsetA, cropH+offsetB), 100, out);
 
                 byte[] bytes = out.toByteArray();
-
-                try {
-                    FileOutputStream snapshot = new FileOutputStream("/storage/sdcard0/caffe/snapshot.jpg");
-                    snapshot.write(bytes);
-                    snapshot.close();
-                    Log.d(LOG_TAG, "saved snapshot");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
+                listener.processCapturedJpeg(bytes);
             }
         });
     }

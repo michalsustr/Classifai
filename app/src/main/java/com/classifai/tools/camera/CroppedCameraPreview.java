@@ -1,4 +1,4 @@
-package com.classifai.camera;
+package com.classifai.tools.camera;
 
 import android.content.Context;
 import android.util.AttributeSet;

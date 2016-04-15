@@ -1,4 +1,4 @@
-package com.classifai.recognition;
+package com.classifai.tools.recognition;
 
 /**
  * Created by shiro on 2014/9/22.

@@ -10,11 +10,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.classifai.R;
-import com.classifai.camera.Camera;
-import com.classifai.camera.CroppedCameraPreview;
-import com.classifai.recognition.RecognitionListener;
-import com.classifai.recognition.RecognitionResult;
-import com.classifai.recognition.RecognitionService;
+import com.classifai.tools.CameraRecognition;
+import com.classifai.tools.camera.Camera;
+import com.classifai.tools.camera.CroppedCameraPreview;
+import com.classifai.tools.recognition.RecognitionListener;
+import com.classifai.tools.recognition.RecognitionResult;
+import com.classifai.tools.recognition.RecognitionService;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -38,6 +39,7 @@ public class MainActivity extends Activity implements RecognitionListener {
     private Camera camera;
 
     private Boolean lightOn = false;
+    private CameraRecognition cameraRecognition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,7 @@ public class MainActivity extends Activity implements RecognitionListener {
 
         caffeService = new RecognitionService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);
         camera = new Camera(this, cameraPreview);
+        cameraRecognition = new CameraRecognition(this);
 
         // TODO: initialize - find what is optimal FPS processing
         // so that we can take camera snapshots with good intervals
@@ -87,6 +90,20 @@ public class MainActivity extends Activity implements RecognitionListener {
         camera.closeCamera();
     }
 
+    public void onLightButtonClicked(View view) {
+        if(lightOn) {
+            Log.d(LOG_TAG, "onLightButtonClicked turn off");
+            lightOn = false;
+            camera.turnLightOff();
+            lightBtn.setBackground(getDrawable(R.drawable.off));
+        } else {
+            lightOn = true;
+            Log.d(LOG_TAG, "onLightButtonClicked turn on");
+            camera.turnLightOn();
+            lightBtn.setBackground(getDrawable(R.drawable.on));
+        }
+    }
+
     @Override
     public void onRecognitionCompleted(RecognitionResult result) {
         Integer[] top5 = result.getTopKIndices(5);
@@ -101,21 +118,5 @@ public class MainActivity extends Activity implements RecognitionListener {
 //        computingProgress.getIndeterminateDrawable()
 //            .setColorFilter(0xFFFF0000, android.graphics.PorterDuff.Mode.MULTIPLY);
 
-    }
-
-    public void onLightButtonClicked(View view) {
-        camera.snapshot();
-
-        if(lightOn) {
-            Log.d(LOG_TAG, "onLightButtonClicked turn off");
-            lightOn = false;
-            camera.turnLightOff();
-            lightBtn.setBackground(getDrawable(R.drawable.off));
-        } else {
-            lightOn = true;
-            Log.d(LOG_TAG, "onLightButtonClicked turn on");
-            camera.turnLightOn();
-            lightBtn.setBackground(getDrawable(R.drawable.on));
-        }
     }
 }

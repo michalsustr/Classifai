@@ -6,7 +6,7 @@
     android:background="@android:color/white"
     android:id="@+id/layout">
 
-    <com.classifai.camera.CroppedCameraPreview
+    <com.classifai.tools.camera.CroppedCameraPreview
         android:layout_width="@dimen/cameraDisplayWidth"
         android:layout_height="@dimen/cameraDisplayHeight"
         android:layout_centerInParent="true"
