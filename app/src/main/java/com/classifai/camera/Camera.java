@@ -39,6 +39,8 @@ public class Camera {
 
     private int cameraNativeWidth;
     private int cameraNativeHeight;
+    private int cameraDisplayWidth;
+    private int cameraDisplayHeight;
     private int captureCropWidth;
     private int captureCropHeight;
     private final int captureSaveWidth;
@@ -51,6 +53,8 @@ public class Camera {
         // load settings
         cameraNativeWidth = context.getResources().getInteger(R.integer.cameraNativeWidth);
         cameraNativeHeight = context.getResources().getInteger(R.integer.cameraNativeHeight);
+        cameraDisplayWidth = context.getResources().getInteger(R.integer.cameraDisplayWidth);
+        cameraDisplayHeight = context.getResources().getInteger(R.integer.cameraDisplayHeight);
         cameraMinFPS = context.getResources().getInteger(R.integer.cameraMinFPS);
         cameraMaxFPS = context.getResources().getInteger(R.integer.cameraMaxFPS);
         captureCropWidth = context.getResources().getInteger(R.integer.captureCropWidth);
@@ -77,9 +81,7 @@ public class Camera {
                 camera = rxCamera;
 
                 cameraSize = camera.getNativeCamera().getParameters().getPreviewSize();
-                return rxCamera.bindTexture(cameraPreview.getTextureView(
-                    cameraPreview.getWidth(), cameraPreview.getHeight(), cameraSize.width, cameraSize.height
-                ));
+                return rxCamera.bindTexture(cameraPreview.getTextureView());
 //                return rxCamera.bindTexture(cameraPreview);
             }
         }).flatMap(new Func1<RxCamera, Observable<RxCamera>>() {

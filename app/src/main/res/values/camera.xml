@@ -7,6 +7,8 @@
         with native dimension so that no unnecessary scaling is done. -->
     <dimen name="cameraDisplayWidth">600px</dimen>
     <dimen name="cameraDisplayHeight">600px</dimen>
+    <integer name="cameraDisplayWidth">600</integer>
+    <integer name="cameraDisplayHeight">600</integer>
     <!-- Inner circle in crop should be actually 400x400
         but let's leave some tolerance for the user. -->
     <integer name="captureCropWidth">500</integer>
