@@ -34,10 +34,14 @@ public class Camera {
 
     private final Context context;
     private final CroppedCameraPreview cameraPreview;
+//    private final TextureView cameraPreview;
     private RxCamera camera;
     private android.hardware.Camera.Size cameraSize;
 
-    public Camera(Context context, CroppedCameraPreview textureView) {
+    public Camera(Context context,
+                  CroppedCameraPreview textureView
+//                  TextureView textureView
+    ) {
         this.cameraPreview = textureView;
         this.context = context;
     }
@@ -47,7 +51,7 @@ public class Camera {
                 useBackCamera().
                 setAutoFocus(true).
                 setPreferPreviewFrameRate(15, 30).
-                setPreferPreviewSize(new Point(480, 456)).
+                setPreferPreviewSize(new Point(800, 600)).
                 setPreviewFormat(ImageFormat.YUY2).
                 setHandleSurfaceEvent(true).
                 get();
@@ -62,6 +66,7 @@ public class Camera {
                 return rxCamera.bindTexture(cameraPreview.getTextureView(
                     cameraPreview.getWidth(), cameraPreview.getHeight(), cameraSize.width, cameraSize.height
                 ));
+//                return rxCamera.bindTexture(cameraPreview);
             }
         }).flatMap(new Func1<RxCamera, Observable<RxCamera>>() {
             @Override

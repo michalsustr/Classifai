@@ -33,6 +33,7 @@ public class MainActivity extends Activity implements RecognitionListener {
     private ProgressBar computingProgress;
     private ImageButton lightBtn;
     private CroppedCameraPreview cameraPreview;
+//    private TextureView cameraPreview;
     private RelativeLayout layout;
     private SurfaceView alphaInner;
 
@@ -52,6 +53,7 @@ public class MainActivity extends Activity implements RecognitionListener {
         computingProgress = (ProgressBar) findViewById(R.id.computing_progress);
         lightBtn = (ImageButton) findViewById(R.id.btnLight);
         cameraPreview = (CroppedCameraPreview) findViewById(R.id.preview_surface);
+//        cameraPreview = (TextureView) findViewById(R.id.preview_surface);
         layout = (RelativeLayout)  findViewById(R.id.layout);
 
         caffeService = new RecognitionService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);

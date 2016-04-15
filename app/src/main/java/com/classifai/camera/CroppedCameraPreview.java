@@ -1,6 +1,7 @@
 package com.classifai.camera;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.TextureView;
 import android.view.ViewGroup;
@@ -13,14 +14,36 @@ public class CroppedCameraPreview extends ViewGroup {
     private TextureView textureView;
     private int croppedWidth = 656;
     private int croppedHeight = 656;
-    private int actualPreviewWidth = 640;
-    private int actualPreviewHeight = 480;
+    private int actualPreviewWidth = 600;
+    private int actualPreviewHeight = 800;
 
     public CroppedCameraPreview( Context context ) {
         super( context );
-
-        textureView = new TextureView(context);
+        createTextureView();
     }
+    public CroppedCameraPreview(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+        createTextureView();
+    }
+    public CroppedCameraPreview(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        createTextureView();
+    }
+
+    private void createTextureView() {
+        textureView = new TextureView(this.getContext());
+        this.addView(textureView);
+    }
+
+    /**
+     * Any layout manager that doesn't scroll will want this.
+     */
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
+
+
     @Override
     protected void onMeasure( int widthMeasureSpec, int heightMeasureSpec ) {
         setMeasuredDimension( croppedWidth, croppedHeight );
@@ -28,7 +51,14 @@ public class CroppedCameraPreview extends ViewGroup {
     @Override
     protected void onLayout( boolean changed, int l, int t, int r, int b ) {
         if ( textureView != null ) {
-            textureView.layout( 0, 0, actualPreviewWidth, actualPreviewHeight );
+            int offsetA = (actualPreviewWidth - croppedWidth) / 2;
+            int offsetB = (actualPreviewHeight- croppedHeight) / 2;
+            textureView.layout(
+                -offsetA,
+                -offsetB,
+                offsetA + croppedWidth,
+                offsetB + croppedHeight
+            );
         }
     }
 
@@ -45,30 +75,5 @@ public class CroppedCameraPreview extends ViewGroup {
             ", croppedHeight=" + croppedHeight
         );
         return textureView;
-    }
-
-    public int getActualPreviewHeight() {
-        return actualPreviewHeight;
-    }
-    public void setActualPreviewHeight(int actualPreviewHeight) {
-        this.actualPreviewHeight = actualPreviewHeight;
-    }
-    public int getActualPreviewWidth() {
-        return actualPreviewWidth;
-    }
-    public void setActualPreviewWidth(int actualPreviewWidth) {
-        this.actualPreviewWidth = actualPreviewWidth;
-    }
-    public int getCroppedHeight() {
-        return croppedHeight;
-    }
-    public void setCroppedHeight(int croppedHeight) {
-        this.croppedHeight = croppedHeight;
-    }
-    public int getCroppedWidth() {
-        return croppedWidth;
-    }
-    public void setCroppedWidth(int croppedWidth) {
-        this.croppedWidth = croppedWidth;
     }
 }
