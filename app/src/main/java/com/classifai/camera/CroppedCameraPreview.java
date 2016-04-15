@@ -12,8 +12,8 @@ import android.view.ViewGroup;
 public class CroppedCameraPreview extends ViewGroup {
     private static final String LOG_TAG = "CroppedCameraPreview";
     private TextureView textureView;
-    private int croppedWidth = 656;
-    private int croppedHeight = 656;
+    private int croppedWidth = 600;
+    private int croppedHeight = 600;
     private int actualPreviewWidth = 600;
     private int actualPreviewHeight = 800;
 

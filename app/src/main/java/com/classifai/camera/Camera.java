@@ -1,8 +1,6 @@
 package com.classifai.camera;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -13,10 +11,8 @@ import com.ragnarok.rxcamera.RxCamera;
 import com.ragnarok.rxcamera.RxCameraData;
 import com.ragnarok.rxcamera.config.RxCameraConfig;
 import com.ragnarok.rxcamera.config.RxCameraConfigChooser;
-import com.ragnarok.rxcamera.request.Func;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -161,10 +157,12 @@ public class Camera {
         Log.d(LOG_TAG, "try snapshot");
 
         android.hardware.Camera.Size mSize = camera.getNativeCamera().getParameters().getPreviewSize();
-        final int mWidth = mSize.width;
-        final int mHeight = mSize.height;
+        final int actualPreviewWidth = mSize.width;
+        final int actualPreviewHeight = mSize.height;
+        final int croppedWidth = 600;
+        final int croppedHeight = 600;
 
-        Log.d(LOG_TAG, "size of preview: "+mWidth+" "+mHeight);
+        Log.d(LOG_TAG, "size of preview: "+actualPreviewWidth+" "+actualPreviewHeight);
 
         camera.request().oneShotRequest().subscribe(new Action1<RxCameraData>() {
             @Override
@@ -175,10 +173,27 @@ public class Camera {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
 
                 // Alter the second parameter of this to the actual format you are receiving
-                YuvImage yuv = new YuvImage(rxCameraData.cameraData, ImageFormat.YUY2, mWidth, mHeight, null);
+                YuvImage yuv = new YuvImage(rxCameraData.cameraData, ImageFormat.YUY2, actualPreviewWidth, actualPreviewHeight, null);
 
                 // bWidth and bHeight define the size of the bitmap you wish the fill with the preview image
-                yuv.compressToJpeg(new Rect(0, 0, mWidth, mHeight), 50, out);
+                int offsetA, offsetB, cropW, cropH;
+//                if(croppedWidth > actualPreviewWidth || croppedHeight > actualPreviewHeight) {
+//                    offsetA = 0;
+//                    offsetB = 0;
+//                    cropW = ;
+//                    cropH = ;
+//                } else {
+                    offsetA = (actualPreviewWidth - croppedWidth) / 2;
+                    offsetB = (actualPreviewHeight- croppedHeight) / 2;
+                    cropW = croppedWidth;
+                    cropH = croppedHeight;
+//                }
+                Log.d(LOG_TAG, "w "+yuv.getWidth() + " h "+yuv.getHeight());
+                Log.d(LOG_TAG, "p w "+actualPreviewWidth + " h "+actualPreviewHeight);
+                Log.d(LOG_TAG, "c w "+croppedWidth+ " h "+croppedHeight);
+                Log.d(LOG_TAG, "r "+offsetA+" "+offsetB+" "+cropW+" "+cropH);
+
+                yuv.compressToJpeg(new Rect(offsetA, offsetB, cropW+offsetA, cropH+offsetB), 100, out);
 
                 byte[] bytes = out.toByteArray();
 
@@ -191,33 +206,6 @@ public class Camera {
                     e.printStackTrace();
                 }
 
-            }
-        });
-    }
-
-    public  void _snapshot() {
-        Log.d(LOG_TAG, "try snapshot");
-        camera.request().takePictureRequest(true, new Func() {
-            @Override
-            public void call() {
-                Log.d(LOG_TAG, "call snapshot");
-            }
-        }, 480, 640, ImageFormat.JPEG).subscribe(new Action1<RxCameraData>() {
-            @Override
-            public void call(RxCameraData rxCameraData) {
-                String path = "/storage/sdcard0/caffe/test.jpg";
-                File file = new File(path);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(rxCameraData.cameraData, 0, rxCameraData.cameraData.length);
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
-                        rxCameraData.rotateMatrix, false);
-                try {
-                    file.createNewFile();
-                    FileOutputStream fos = new FileOutputStream(file);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                    fos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         });
     }

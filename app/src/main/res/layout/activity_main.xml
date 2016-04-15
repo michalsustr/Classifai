@@ -13,14 +13,14 @@
         <!--android:layout_centerInParent="true"-->
         <!--android:id="@+id/preview_surface" />-->
     <com.classifai.camera.CroppedCameraPreview
-        android:layout_width="656px"
-        android:layout_height="656px"
+        android:layout_width="600px"
+        android:layout_height="600px"
         android:layout_centerInParent="true"
         android:id="@+id/preview_surface" />
 
     <!--<ImageView-->
-        <!--android:layout_width="656px"-->
-        <!--android:layout_height="656px"-->
+        <!--android:layout_width="600px"-->
+        <!--android:layout_height="600px"-->
         <!--android:background="@drawable/alpha_cover"-->
         <!--android:layout_centerInParent="true"-->
         <!--android:id="@+id/alpha"-->
@@ -59,23 +59,23 @@
         android:background="@drawable/off"
         android:onClick="onLightButtonClicked"/>
 
-    <!--<ProgressBar-->
-        <!--android:indeterminate="true"-->
-        <!--android:layout_width="50dp" android:layout_height="50dp"-->
-        <!--android:id="@+id/computing_progress" style="?android:attr/progressBarStyle"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_marginBottom="20dp"-->
-        <!--android:layout_marginRight="20dp" />-->
-
-    <View
+    <ProgressBar
+        android:indeterminate="true"
         android:layout_width="50dp" android:layout_height="50dp"
-        android:id="@+id/computing_progress"
+        android:id="@+id/computing_progress" style="?android:attr/progressBarStyle"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="20dp"
-        android:layout_marginRight="20dp"
-        android:background="@android:color/holo_red_dark"/>
+        android:layout_marginRight="20dp" />
+
+    <!--<View-->
+        <!--android:layout_width="50dp" android:layout_height="50dp"-->
+        <!--android:id="@+id/computing_progress"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_marginBottom="20dp"-->
+        <!--android:layout_marginRight="20dp"-->
+        <!--android:background="@android:color/holo_red_dark"/>-->
 
 
 </RelativeLayout>
