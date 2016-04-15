@@ -1,4 +1,4 @@
-package com.classifai.service;
+package com.classifai.recognition;
 
 import android.os.AsyncTask;
 import android.os.SystemClock;
@@ -17,7 +17,7 @@ import java.util.Scanner;
 /**
  * Created by Michal Sustr [michal.sustr@gmail.com] on 4/8/16.
  */
-public class CaffeService {
+public class RecognitionService {
     private static final String LOG_TAG = "CaffeService";
     private final CaffeMobile caffeMobile;
     private CNNTask cnnTask;
@@ -32,10 +32,10 @@ public class CaffeService {
         System.loadLibrary("caffe_jni");
     }
 
-    private CaffeResult lastResult;
+    private RecognitionResult lastResult;
 
 
-    public CaffeService(String caffeModelDeploy, String caffeModelWeights, String caffeModelLabels) {
+    public RecognitionService(String caffeModelDeploy, String caffeModelWeights, String caffeModelLabels) {
         this.caffeModelDeploy  = caffeModelDeploy;
         this.caffeModelWeights = caffeModelWeights;
         this.caffeModelLabels  = caffeModelLabels;
@@ -81,7 +81,7 @@ public class CaffeService {
         return caffeMobile;
     }
 
-    public void classifyImage(String imgPath, CNNListener result) {
+    public void classifyImage(String imgPath, RecognitionListener result) {
         // there might be already a running instance, if yes cancel it
         if(cnnTask != null) {
             if(cnnTask.getStatus() == AsyncTask.Status.RUNNING
@@ -101,25 +101,25 @@ public class CaffeService {
         return lastResult.getFPS();
     }
 
-    private class CNNTask extends AsyncTask<String, Void, CaffeResult> {
-        private CNNListener listener;
+    private class CNNTask extends AsyncTask<String, Void, RecognitionResult> {
+        private RecognitionListener listener;
         private long startTime;
 
-        public CNNTask(CNNListener listener) {
+        public CNNTask(RecognitionListener listener) {
             this.listener = listener;
         }
 
         @Override
-        protected CaffeResult doInBackground(String... strings) {
+        protected RecognitionResult doInBackground(String... strings) {
             startTime = SystemClock.uptimeMillis();
             Log.i(LOG_TAG, "started processing");
-            CaffeResult result = new CaffeResult(caffeMobile.getConfidenceScore(strings[0]), class2label);
+            RecognitionResult result = new RecognitionResult(caffeMobile.getConfidenceScore(strings[0]), class2label);
             Log.i(LOG_TAG, "done processing");
             return result;
         }
 
         @Override
-        protected void onPostExecute(CaffeResult result) {
+        protected void onPostExecute(RecognitionResult result) {
             long executionTime = SystemClock.uptimeMillis() - startTime;
             Log.i(LOG_TAG, String.format("elapsed wall time: %d ms", executionTime));
             Log.i(LOG_TAG, "Result: "+result);

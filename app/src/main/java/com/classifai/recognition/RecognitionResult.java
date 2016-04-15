@@ -1,4 +1,4 @@
-package com.classifai.service;
+package com.classifai.recognition;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -6,13 +6,13 @@ import java.util.Comparator;
 /**
  * Created by Michal Sustr [michal.sustr@gmail.com] on 4/8/16.
  */
-public class CaffeResult {
+public class RecognitionResult {
     private long executionTime;
     private float[] confidenceScore;
     private Integer[] sortedIndices;
     private String[] class2label;
 
-    public CaffeResult(float[] confidenceScore, String[] class2label) {
+    public RecognitionResult(float[] confidenceScore, String[] class2label) {
         this.confidenceScore = confidenceScore;
         this.class2label = class2label;
 
