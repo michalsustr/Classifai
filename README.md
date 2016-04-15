@@ -15,5 +15,13 @@ https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 ## TODO
 
+- [X] setup camera UI
+- [X] save a frame from the stream
+- [ ] interface with caffe
+- [ ] allow turning light on/off
+- [ ] touch to focus camera
+- [ ] recognition in progress indicator
 - [ ] initialize - find what is optimal FPS processing
+- [ ] use accelerometer to find when it is appropriate to do processing
 - [ ] direct loading of captured file by caffe, not via storing to card
+- [ ] caffe using GPU?
