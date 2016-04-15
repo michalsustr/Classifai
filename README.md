@@ -1,19 +1,15 @@
-caffe-android-demo
-==================
-An android caffe demo app exploiting caffe pre-trained ImageNet model for image classification
+Classifai Recognition app
+=========================
+An android app for real time object classification. This code can be freely extended for your special use-case.
 
-## Quick Start
+Please see http://michal.sustr.sk/classifai for more information.
 
-### Basic
+## License
+Noncommercial license. You may not use this work for commercial purposes.
+If you want to use it for commercial purposes, please let me know.
+Commercial users should use the whole Classifai package.
+https://creativecommons.org/licenses/by-nc-sa/4.0/
 
-If you want to have a try on this app, please follow the steps below to get the required stuff:
-```shell
-# 1. get caffe if you don't have one
-git clone https://github.com/BVLC/caffe.git
-# 2. download model (bvlc_reference_caffenet is used)
-cd caffe
-./scripts/download_model_binary.py models/bvlc_reference_caffenet/
-# 3. push things to your device
-adb shell mkdir -p /sdcard/caffe_mobile/
-adb push models/bvlc_reference_caffenet/ /sdcard/caffe_mobile/bvlc_reference_caffenet/
-```
+## TODO
+[ ] initialize - find what is optimal FPS processing
+[ ] direct loading of captured file by caffe, not via storing to card
