@@ -6,7 +6,7 @@
     android:background="@android:color/white"
     android:id="@+id/layout">
 
-    <TextureView
+    <com.classifai.camera.CroppedCameraPreview
         android:layout_width="656px"
         android:layout_height="656px"
         android:layout_centerInParent="true"

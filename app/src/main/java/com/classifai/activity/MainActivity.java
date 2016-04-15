@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
-import android.view.TextureView;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
@@ -13,6 +12,7 @@ import android.widget.TextView;
 
 import com.classifai.R;
 import com.classifai.camera.Camera;
+import com.classifai.camera.CroppedCameraPreview;
 import com.classifai.recognition.RecognitionListener;
 import com.classifai.recognition.RecognitionResult;
 import com.classifai.recognition.RecognitionService;
@@ -32,7 +32,7 @@ public class MainActivity extends Activity implements RecognitionListener {
     private TextView scoreLabel;
     private ProgressBar computingProgress;
     private ImageButton lightBtn;
-    private TextureView textureView;
+    private CroppedCameraPreview cameraPreview;
     private RelativeLayout layout;
     private SurfaceView alphaInner;
 
@@ -51,11 +51,14 @@ public class MainActivity extends Activity implements RecognitionListener {
         fpsLabel   = (TextView) findViewById(R.id.fpsLabel);
         computingProgress = (ProgressBar) findViewById(R.id.computing_progress);
         lightBtn = (ImageButton) findViewById(R.id.btnLight);
-        textureView = (TextureView) findViewById(R.id.preview_surface);
+        cameraPreview = (CroppedCameraPreview) findViewById(R.id.preview_surface);
         layout = (RelativeLayout)  findViewById(R.id.layout);
 
         caffeService = new RecognitionService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);
-        camera = new Camera(this, textureView);
+        camera = new Camera(this, cameraPreview);
+
+        // TODO: initialize - find what is optimal FPS processing
+        // so that we can take camera snapshots with good intervals
     }
 
 
@@ -103,6 +106,8 @@ public class MainActivity extends Activity implements RecognitionListener {
     }
 
     public void onLightButtonClicked(View view) {
+        camera.snapshot();
+
         if(lightOn) {
             Log.d(LOG_TAG, "onLightButtonClicked turn off");
             lightOn = false;
