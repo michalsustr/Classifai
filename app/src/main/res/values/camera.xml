@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Native camera resolution -->
+    <integer name="cameraNativeWidth">800</integer>
+    <integer name="cameraNativeHeight">600</integer>
+    <!-- The displayed values should have one dimension agreeing
+        with native dimension so that no unnecessary scaling is done. -->
+    <dimen name="cameraDisplayWidth">600px</dimen>
+    <dimen name="cameraDisplayHeight">600px</dimen>
+    <!-- Inner circle in crop should be actually 400x400
+        but let's leave some tolerance for the user. -->
+    <integer name="captureCropWidth">500</integer>
+    <integer name="captureCropHeight">500</integer>
+    <!-- Size needed by caffe -->
+    <integer name="captureSaveWidth">227</integer>
+    <integer name="captureSaveHeight">227</integer>
+
+    <integer name="cameraMinFPS">15</integer>
+    <integer name="cameraMaxFPS">30</integer>
+</resources>

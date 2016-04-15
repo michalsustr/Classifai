@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.util.Log;
 
+import com.classifai.R;
 import com.ragnarok.rxcamera.RxCamera;
 import com.ragnarok.rxcamera.RxCameraData;
 import com.ragnarok.rxcamera.config.RxCameraConfig;
@@ -30,28 +31,45 @@ public class Camera {
 
     private final Context context;
     private final CroppedCameraPreview cameraPreview;
-//    private final TextureView cameraPreview;
     private RxCamera camera;
     private android.hardware.Camera.Size cameraSize;
+    private int cameraMinFPS;
+    private int cameraMaxFPS;
 
-    public Camera(Context context,
-                  CroppedCameraPreview textureView
-//                  TextureView textureView
-    ) {
+
+    private int cameraNativeWidth;
+    private int cameraNativeHeight;
+    private int captureCropWidth;
+    private int captureCropHeight;
+    private final int captureSaveWidth;
+    private final int captureSaveHeight;
+
+    public Camera(Context context, CroppedCameraPreview textureView) {
         this.cameraPreview = textureView;
         this.context = context;
+
+        // load settings
+        cameraNativeWidth = context.getResources().getInteger(R.integer.cameraNativeWidth);
+        cameraNativeHeight = context.getResources().getInteger(R.integer.cameraNativeHeight);
+        cameraMinFPS = context.getResources().getInteger(R.integer.cameraMinFPS);
+        cameraMaxFPS = context.getResources().getInteger(R.integer.cameraMaxFPS);
+        captureCropWidth = context.getResources().getInteger(R.integer.captureCropWidth);
+        captureCropHeight = context.getResources().getInteger(R.integer.captureCropHeight);
+        captureSaveWidth = context.getResources().getInteger(R.integer.captureSaveWidth);
+        captureSaveHeight = context.getResources().getInteger(R.integer.captureSaveHeight);
     }
 
     public void openCamera() {
         RxCameraConfig config = RxCameraConfigChooser.obtain().
                 useBackCamera().
                 setAutoFocus(true).
-                setPreferPreviewFrameRate(15, 30).
-                setPreferPreviewSize(new Point(800, 600)).
+                setPreferPreviewFrameRate(cameraMinFPS, cameraMaxFPS).
+                setPreferPreviewSize(new Point(cameraNativeWidth, cameraNativeHeight)).
                 setPreviewFormat(ImageFormat.YUY2).
                 setHandleSurfaceEvent(true).
                 get();
         Log.d(LOG_TAG, "config: " + config);
+
         RxCamera.open(context, config).flatMap(new Func1<RxCamera, Observable<RxCamera>>() {
             @Override
             public Observable<RxCamera> call(RxCamera rxCamera) {
@@ -157,42 +175,24 @@ public class Camera {
         Log.d(LOG_TAG, "try snapshot");
 
         android.hardware.Camera.Size mSize = camera.getNativeCamera().getParameters().getPreviewSize();
-        final int actualPreviewWidth = mSize.width;
-        final int actualPreviewHeight = mSize.height;
-        final int croppedWidth = 600;
-        final int croppedHeight = 600;
+        final int nativeWidth = mSize.width;
+        final int nativeHeight = mSize.height;
 
-        Log.d(LOG_TAG, "size of preview: "+actualPreviewWidth+" "+actualPreviewHeight);
+        Log.d(LOG_TAG, "size of preview: "+nativeWidth+" "+nativeHeight);
 
         camera.request().oneShotRequest().subscribe(new Action1<RxCameraData>() {
             @Override
             public void call(RxCameraData rxCameraData) {
                 Log.d(LOG_TAG, "call snapshot");
                 Log.d(LOG_TAG, "data " + rxCameraData.cameraData.length);
-                // pWidth and pHeight define the size of the preview Frame
+                // convert to something normal than the weird camera format, and get proper capture square
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
+                YuvImage yuv = new YuvImage(rxCameraData.cameraData, ImageFormat.YUY2, nativeWidth, nativeHeight, null);
 
-                // Alter the second parameter of this to the actual format you are receiving
-                YuvImage yuv = new YuvImage(rxCameraData.cameraData, ImageFormat.YUY2, actualPreviewWidth, actualPreviewHeight, null);
-
-                // bWidth and bHeight define the size of the bitmap you wish the fill with the preview image
-                int offsetA, offsetB, cropW, cropH;
-//                if(croppedWidth > actualPreviewWidth || croppedHeight > actualPreviewHeight) {
-//                    offsetA = 0;
-//                    offsetB = 0;
-//                    cropW = ;
-//                    cropH = ;
-//                } else {
-                    offsetA = (actualPreviewWidth - croppedWidth) / 2;
-                    offsetB = (actualPreviewHeight- croppedHeight) / 2;
-                    cropW = croppedWidth;
-                    cropH = croppedHeight;
-//                }
-                Log.d(LOG_TAG, "w "+yuv.getWidth() + " h "+yuv.getHeight());
-                Log.d(LOG_TAG, "p w "+actualPreviewWidth + " h "+actualPreviewHeight);
-                Log.d(LOG_TAG, "c w "+croppedWidth+ " h "+croppedHeight);
-                Log.d(LOG_TAG, "r "+offsetA+" "+offsetB+" "+cropW+" "+cropH);
-
+                int offsetA = (nativeWidth - captureCropWidth) / 2;
+                int offsetB = (nativeHeight- captureCropHeight) / 2;
+                int cropW = captureCropWidth;
+                int cropH = captureCropHeight;
                 yuv.compressToJpeg(new Rect(offsetA, offsetB, cropW+offsetA, cropH+offsetB), 100, out);
 
                 byte[] bytes = out.toByteArray();
