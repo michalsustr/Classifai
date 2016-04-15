@@ -6,7 +6,6 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -30,10 +29,8 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     private TextView fpsLabel;
     private TextView scoreLabel;
-    private ProgressBar computingProgress;
     private ImageButton lightBtn;
     private CroppedCameraPreview cameraPreview;
-//    private TextureView cameraPreview;
     private RelativeLayout layout;
     private SurfaceView alphaInner;
 
@@ -50,10 +47,9 @@ public class MainActivity extends Activity implements RecognitionListener {
 
         scoreLabel = (TextView) findViewById(R.id.scoreLabel);
         fpsLabel   = (TextView) findViewById(R.id.fpsLabel);
-        computingProgress = (ProgressBar) findViewById(R.id.computing_progress);
+//        computingProgress = (ProgressBar) findViewById(R.id.computing_progress);
         lightBtn = (ImageButton) findViewById(R.id.btnLight);
         cameraPreview = (CroppedCameraPreview) findViewById(R.id.preview_surface);
-//        cameraPreview = (TextureView) findViewById(R.id.preview_surface);
         layout = (RelativeLayout)  findViewById(R.id.layout);
 
         caffeService = new RecognitionService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);
