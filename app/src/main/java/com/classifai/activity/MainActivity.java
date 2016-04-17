@@ -41,6 +41,11 @@ public class MainActivity extends Activity implements RecognitionListener {
     private Boolean lightOn = false;
     private CameraRecognition cameraRecognition;
 
+    /**
+     * Interval for recognition capture
+     */
+    private Integer captureInterval;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,10 +61,11 @@ public class MainActivity extends Activity implements RecognitionListener {
 
         caffeService = new RecognitionService(CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS);
         camera = new Camera(this, cameraPreview);
-        cameraRecognition = new CameraRecognition(this);
+        cameraRecognition = new CameraRecognition(camera, caffeService, this);
 
         // TODO: initialize - find what is optimal FPS processing
         // so that we can take camera snapshots with good intervals
+        this.captureInterval = 2000;
     }
 
 
@@ -80,6 +86,7 @@ public class MainActivity extends Activity implements RecognitionListener {
             @Override
             public void run() {
                 camera.openCamera();
+                cameraRecognition.startRecognition(captureInterval);
             }
         }, 100);
     }
@@ -88,6 +95,7 @@ public class MainActivity extends Activity implements RecognitionListener {
     protected void onPause() {
         super.onPause();
         camera.closeCamera();
+        cameraRecognition.stopRecognition();
     }
 
     public void onLightButtonClicked(View view) {

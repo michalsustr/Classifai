@@ -1,5 +1,6 @@
 package com.classifai.tools.recognition;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.SystemClock;
 import android.util.Log;
@@ -20,6 +21,7 @@ import java.util.Scanner;
 public class RecognitionService {
     private static final String LOG_TAG = "CaffeService";
     private final CaffeMobile caffeMobile;
+    private final Context context;
     private CNNTask cnnTask;
     private String caffeModelDeploy;
     private String caffeModelWeights;
@@ -35,10 +37,11 @@ public class RecognitionService {
     private RecognitionResult lastResult;
 
 
-    public RecognitionService(String caffeModelDeploy, String caffeModelWeights, String caffeModelLabels) {
+    public RecognitionService(String caffeModelDeploy, String caffeModelWeights, String caffeModelLabels, Context context) {
         this.caffeModelDeploy  = caffeModelDeploy;
         this.caffeModelWeights = caffeModelWeights;
         this.caffeModelLabels  = caffeModelLabels;
+        this.context = context;
 
         if(!new File(caffeModelDeploy).exists()
                 || !new File(caffeModelWeights).exists()
@@ -126,6 +129,7 @@ public class RecognitionService {
 
             lastResult = result;
             result.setExecutionTime(executionTime);
+
             listener.onRecognitionCompleted(result);
             super.onPostExecute(result);
         }
