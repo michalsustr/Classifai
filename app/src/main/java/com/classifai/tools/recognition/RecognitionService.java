@@ -89,8 +89,8 @@ public class RecognitionService {
         if(cnnTask != null) {
             if(cnnTask.getStatus() == AsyncTask.Status.RUNNING
             || cnnTask.getStatus() == AsyncTask.Status.PENDING) {
+                Log.i(LOG_TAG, "classifyImage asyncTask canceled "+cnnTask );
                 cnnTask.cancel(true);
-                Log.i(LOG_TAG, "classifyImage asyncTask canceled");
             }
             cnnTask = null;
         }
@@ -113,10 +113,19 @@ public class RecognitionService {
         }
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            if(listener != null) {
+                listener.onRecognitionStart();
+            }
+        }
+
+        @Override
         protected RecognitionResult doInBackground(String... strings) {
             startTime = SystemClock.uptimeMillis();
             Log.i(LOG_TAG, "started processing");
-            RecognitionResult result = new RecognitionResult(caffeMobile.getConfidenceScore(strings[0]), class2label);
+            RecognitionResult result = new RecognitionResult(
+                caffeMobile.getConfidenceScore(strings[0]), class2label);
             Log.i(LOG_TAG, "done processing");
             return result;
         }
@@ -130,8 +139,16 @@ public class RecognitionService {
             lastResult = result;
             result.setExecutionTime(executionTime);
 
-            listener.onRecognitionCompleted(result);
-            super.onPostExecute(result);
+            cnnTask = null;
+            if(listener != null) {
+                listener.onRecognitionCompleted(result);
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            Log.i(LOG_TAG, "onCancelled");
+            listener.onRecognitionCanceled();
         }
     }
 }

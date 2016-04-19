@@ -6,6 +6,7 @@ import android.util.Log;
 import com.classifai.tools.camera.Camera;
 import com.classifai.tools.camera.CameraSnapshotListener;
 import com.classifai.tools.recognition.RecognitionListener;
+import com.classifai.tools.recognition.RecognitionResult;
 import com.classifai.tools.recognition.RecognitionService;
 
 import java.io.FileOutputStream;
@@ -35,6 +36,23 @@ public class CameraRecognition implements CameraSnapshotListener {
         this.recognitionListener = recognitionListener;
     }
 
+    public void warmUpCaffe(final RecognitionListener warmupListener) {
+        final String snapshotFile = "/storage/sdcard0/caffe/snapshot_0.jpg";
+        // This is warmup
+        recognitionService.classifyImage(snapshotFile, new RecognitionListener() {
+            @Override
+            public void onRecognitionStart() {}
+            @Override
+            public void onRecognitionCanceled() {}
+            @Override
+            public void onRecognitionCompleted(RecognitionResult result) {
+                // here we get the FPS we should use
+                recognitionService.classifyImage(snapshotFile, warmupListener);
+            }
+        });
+    }
+
+
     @Override
     public void processCapturedJpeg(byte[] bytes) {
         try {
@@ -61,7 +79,9 @@ public class CameraRecognition implements CameraSnapshotListener {
     }
 
     public void stopRecognition() {
-        timedSnapshot.stopRunning();
+        if(timedSnapshot != null) {
+            timedSnapshot.stopRunning();
+        }
     }
 
     private class SnapshotRunnable implements Runnable {

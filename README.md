@@ -17,11 +17,17 @@ https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 - [X] setup camera UI
 - [X] save a frame from the stream
-- [ ] interface with caffe
+- [X] interface with caffe
+- [X] initialize - find what is optimal FPS processing
+- [X] recognition in progress indicator
 - [ ] allow turning light on/off
 - [ ] touch to focus camera
-- [ ] recognition in progress indicator
-- [ ] initialize - find what is optimal FPS processing
+- [ ] multiframe recognition using avg over scores
+- [ ] calculate probability with bayes using prior probability of labels
+- [ ] splash loading screen
 - [ ] use accelerometer to find when it is appropriate to do processing
 - [ ] direct loading of captured file by caffe, not via storing to card
+- [ ] storing snapshots with probabilities
+- [ ] create install procedure which checks for available space (needed to store snapshots and models)
+- [ ] API calls for finding available models
 - [ ] caffe using GPU?
