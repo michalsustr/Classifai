@@ -81,11 +81,36 @@ public class RecognitionService {
         }
     }
 
+    public void warmUp(final RecognitionListener warmupListener) {
+        final String snapshotFile = "/storage/sdcard0/caffe/snapshot_0.jpg";
+
+        // This is warmup
+        classifyImage(snapshotFile, new RecognitionListener() {
+            @Override
+            public void onRecognitionStart() {
+                Log.d(TAG, "RecognitionService.warmUp start");
+            }
+
+            @Override
+            public void onRecognitionCanceled() {
+                Log.d(TAG, "RecognitionService.warmUp canceled");
+            }
+
+            @Override
+            public void onRecognitionCompleted(RecognitionResult result) {
+                Log.d(TAG, "RecognitionService.warmUp completed");
+                // here we get the FPS we should use
+                classifyImage(snapshotFile, warmupListener);
+            }
+        });
+    }
+
     public final CaffeMobile getCaffeMobile() {
         return caffeMobile;
     }
 
     public void classifyImage(String imgPath, RecognitionListener result) {
+        Log.i(TAG, "RecognitionService.classifyImage "+imgPath);
         // there might be already a running instance, if yes cancel it
         if(cnnTask != null) {
             if(cnnTask.getStatus() == AsyncTask.Status.RUNNING
@@ -116,6 +141,7 @@ public class RecognitionService {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            Log.i(TAG, "RecognitionService.CNNTask.onPreExecute [thread "+Thread.currentThread().getName()+"]");
             if(listener != null) {
                 listener.onRecognitionStart();
             }
@@ -124,17 +150,17 @@ public class RecognitionService {
         @Override
         protected RecognitionResult doInBackground(String... strings) {
             startTime = SystemClock.uptimeMillis();
-            Log.i(TAG, "RecognitionService.CNNTask.doInBackground started processing");
+            Log.i(TAG, "RecognitionService.CNNTask.doInBackground started processing [thread "+Thread.currentThread().getName()+"]");
             RecognitionResult result = new RecognitionResult(
                 caffeMobile.getConfidenceScore(strings[0]), class2label);
-            Log.i(TAG, "RecognitionService.CNNTask.doInBackground done processing");
+            Log.i(TAG, "RecognitionService.CNNTask.doInBackground done processing [thread "+Thread.currentThread().getName()+"]");
             return result;
         }
 
         @Override
         protected void onPostExecute(RecognitionResult result) {
             long executionTime = SystemClock.uptimeMillis() - startTime;
-            Log.i(TAG, "RecognitionService.CNNTask.onPostExecute "+String.format("elapsed wall time: %d ms", executionTime));
+            Log.i(TAG, "RecognitionService.CNNTask.onPostExecute "+String.format("elapsed wall time: %d ms", executionTime) + " [thread "+Thread.currentThread().getName()+"]");
             Log.i(TAG, "RecognitionService.CNNTask.onPostExecute top5 result: "+result.top5toString());
 
             lastResult = result;
@@ -148,8 +174,10 @@ public class RecognitionService {
 
         @Override
         protected void onCancelled() {
-            Log.i(TAG, "RecognitionService.CNNTask.onCancelled");
+            Log.i(TAG, "RecognitionService.CNNTask.onCancelled [thread "+Thread.currentThread().getName()+"]");
             listener.onRecognitionCanceled();
         }
+
+
     }
 }

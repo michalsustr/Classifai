@@ -180,7 +180,7 @@ public class Camera {
 
 
     public void takeSnapshot(final CameraSnapshotListener listener) {
-        Log.d(TAG, "Camera.takeSnapshot");
+        Log.d(TAG, "Camera.takeSnapshot [thread "+Thread.currentThread().getName()+"]");
 
         android.hardware.Camera.Size mSize = camera.getNativeCamera().getParameters().getPreviewSize();
         final int nativeWidth = mSize.width;
@@ -189,8 +189,8 @@ public class Camera {
         camera.request().oneShotRequest().subscribe(new Action1<RxCameraData>() {
             @Override
             public void call(RxCameraData rxCameraData) {
-                Log.d(TAG, "Camera.takeSnapshot call takeSnapshot");
-                Log.d(TAG, "Camera.takeSnapshot data of length " + rxCameraData.cameraData.length);
+                Log.d(TAG, "Camera.takeSnapshot call takeSnapshot [thread "+Thread.currentThread().getName()+"]");
+                Log.d(TAG, "Camera.takeSnapshot data of length " + rxCameraData.cameraData.length + " [thread "+Thread.currentThread().getName()+"]");
                 // convert to something normal than the weird camera format, and get proper capture square
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 YuvImage yuv = new YuvImage(rxCameraData.cameraData, ImageFormat.YUY2, nativeWidth, nativeHeight, null);

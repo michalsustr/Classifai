@@ -3,7 +3,6 @@ package com.classifai.activity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -37,8 +36,7 @@ public class MainActivity extends Activity implements RecognitionListener {
     private RelativeLayout layout;
     private CircleProgress circularProgressBar;
 
-    private SurfaceView alphaInner;
-    private RecognitionService caffeService;
+    private RecognitionService recognitionService;
 
     private Camera camera;
     private Boolean lightOn = false;
@@ -49,6 +47,7 @@ public class MainActivity extends Activity implements RecognitionListener {
      */
     private Integer captureInterval;
     private boolean isResumed = false;
+    private int animationPause = 300;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,10 +63,10 @@ public class MainActivity extends Activity implements RecognitionListener {
         cameraPreview = (CroppedCameraPreview) findViewById(R.id.preview_surface);
         layout = (RelativeLayout)  findViewById(R.id.layout);
 
-        caffeService = new RecognitionService(
+        recognitionService = new RecognitionService(
                 CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS, getApplicationContext());
         camera = new Camera(this, cameraPreview);
-        cameraRecognition = new CameraRecognition(camera, caffeService, this);
+        cameraRecognition = new CameraRecognition(camera, recognitionService, this, this);
 
         circularProgressBar = (CircleProgress) findViewById(R.id.pb);
 
@@ -81,7 +80,8 @@ public class MainActivity extends Activity implements RecognitionListener {
     @Override
     protected void onPostResume() {
         Log.d(TAG, "MainActivity.onPostResume");
-        circularProgressBar.setProgress(0);
+//        circularProgressBar.animateProgress(2000);
+        scoreLabel.setText("");
         statusText.setText(getString(R.string.loading_model_wait));
 
         // This is kind of hacky, but I don't know how to do it otherwise to initialize
@@ -104,28 +104,35 @@ public class MainActivity extends Activity implements RecognitionListener {
             new Timer().schedule(new TimerTask() {
                 @Override
                 public void run() {
+                    Log.d(TAG, "MainActivity.onPostResume open camera [thread "+Thread.currentThread().getName()+"]");
                     camera.openCamera();
 
-                    cameraRecognition.warmUpCaffe(new RecognitionListener() {
+                    recognitionService.warmUp(new RecognitionListener() {
                         @Override
                         public void onRecognitionStart() {
+                            Log.d(TAG, "MainActivity.onPostResume start FPS count [thread "+Thread.currentThread().getName()+"]");
+                            statusText.setText(getString(R.string.estimateFps));
                         }
 
                         @Override
                         public void onRecognitionCompleted(RecognitionResult result) {
-                            captureInterval = (int) (result.getExecutionTime() * 2.0);
+                            Log.d(TAG, "MainActivity.onPostResume completed FPS count [thread "+Thread.currentThread().getName()+"]");
+//                            circularProgressBar.stopAnimation();
                             statusText.setText(String.format(getString(R.string.model_loaded_text),
-                                (captureInterval / 1000.0)) + "sec");
+                                    (result.getExecutionTime() / 1000.0)));
                             fpsLabel.setText("FPS: " + String.format("%.2f", result.getFPS()));
-                            cameraRecognition.startRecognition(captureInterval);
+                            captureInterval = (int) (result.getExecutionTime());
+                            Log.d(TAG, "MainActivity.onPostResume start recognition with capture interval "+captureInterval+" [thread "+Thread.currentThread().getName()+"]");
+                            cameraRecognition.startRecognition(captureInterval, animationPause);
                         }
 
                         @Override
                         public void onRecognitionCanceled() {
+                            Log.d(TAG, "MainActivity.onPostResume canceled FPS count [thread "+Thread.currentThread().getName()+"]");
                         }
                     });
                 }
-            }, 100);
+            }, 500);
         }
 
         super.onPostResume();
@@ -158,7 +165,7 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     @Override
     public void onRecognitionStart() {
-        Log.d(TAG, "MainActivity.onRecognitionStart");
+        Log.d(TAG, "MainActivity.onRecognitionStart [thread "+Thread.currentThread().getName()+"]");
 
         circularProgressBar.setProgress(0);
         circularProgressBar.setProgressWithAnimation(95, captureInterval);
@@ -166,7 +173,7 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     @Override
     public void onRecognitionCompleted(RecognitionResult result) {
-        Log.d(TAG, "MainActivity.onRecognitionCompleted");
+        Log.d(TAG, "MainActivity.onRecognitionCompleted [thread "+Thread.currentThread().getName()+"]");
 
         Integer[] top5 = result.getTopKIndices(5);
         StringBuilder show = new StringBuilder();
@@ -177,7 +184,7 @@ public class MainActivity extends Activity implements RecognitionListener {
 
         // finish progress bar to 100% if we are faster
         circularProgressBar.stopAnimation();
-        circularProgressBar.setProgressWithAnimation(100, 300);
+        circularProgressBar.setProgressWithAnimation(100, animationPause);
         fpsLabel.setText("FPS: " + String.format("%.2f", result.getFPS()));
         scoreLabel.setText(show);
         statusText.setText("");
@@ -185,6 +192,7 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     @Override
     public void onRecognitionCanceled() {
+        Log.d(TAG, "MainActivity.onRecognitionCanceled [thread "+Thread.currentThread().getName()+"]");
 //        circularProgressBar.setProgress(0);
     }
 }

@@ -25,6 +25,15 @@ public class CircleProgress extends CircularProgressBar {
         objectAnimator.start();
     }
 
+    public void animateProgress(int oneCycleDuration) {
+        objectAnimator = ObjectAnimator.ofFloat(this, "progress", new float[]{100});
+        objectAnimator.setDuration((long)oneCycleDuration);
+        objectAnimator.setInterpolator(new DecelerateInterpolator());
+        objectAnimator.setRepeatMode(ObjectAnimator.INFINITE);
+        objectAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+        objectAnimator.start();
+    }
+
     public void stopAnimation() {
         objectAnimator.cancel();
         objectAnimator = null;

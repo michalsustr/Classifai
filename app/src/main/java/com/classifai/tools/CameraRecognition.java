@@ -1,5 +1,6 @@
 package com.classifai.tools;
 
+import android.app.Activity;
 import android.os.Handler;
 import android.util.Log;
 
@@ -20,68 +21,65 @@ public class CameraRecognition implements CameraSnapshotListener {
     private final Camera camera;
     private final RecognitionService recognitionService;
     private final RecognitionListener recognitionListener;
+    private final Activity activity;
 
-    private Integer captureInterval;
-    private SnapshotRunnable timedSnapshot;
     private Handler handler;
+    private SnapshotRunnable timedSnapshot;
+    private RecognitionRunnable timedRecognition;
     private Integer snapshotNum = 0;
 
     public CameraRecognition(
             Camera camera,
             RecognitionService recognitionService,
-            RecognitionListener recognitionListener) {
+            RecognitionListener recognitionListener,
+            Activity activity) {
         handler = new Handler();
         this.camera = camera;
         this.recognitionService = recognitionService;
         this.recognitionListener = recognitionListener;
+        this.activity = activity;
     }
-
-    public void warmUpCaffe(final RecognitionListener warmupListener) {
-        final String snapshotFile = "/storage/sdcard0/caffe/snapshot_0.jpg";
-        // This is warmup
-        recognitionService.classifyImage(snapshotFile, new RecognitionListener() {
-            @Override
-            public void onRecognitionStart() {}
-            @Override
-            public void onRecognitionCanceled() {}
-            @Override
-            public void onRecognitionCompleted(RecognitionResult result) {
-                // here we get the FPS we should use
-                recognitionService.classifyImage(snapshotFile, warmupListener);
-            }
-        });
-    }
-
 
     @Override
     public void processCapturedJpeg(byte[] bytes) {
         try {
-            String snapshotFile = "/storage/sdcard0/caffe/snapshot_"+(snapshotNum++)+".jpg";
+            String snapshotFile = getSnapshotFileName(snapshotNum++);
             FileOutputStream snapshot = new FileOutputStream(snapshotFile);
             snapshot.write(bytes);
             snapshot.close();
-            Log.d(TAG, "CameraRecognition.processCapturedJpeg saved snapshot to "+snapshotFile);
+            Log.d(TAG, "CameraRecognition.processCapturedJpeg saved snapshot to " + snapshotFile);
 
-            recognitionService.classifyImage(snapshotFile, recognitionListener);
         } catch (IOException e) {
             Log.e(TAG, "CameraRecognition.processCapturedJpeg error writing: "+e);
             e.printStackTrace();
         }
     }
 
+    private String getSnapshotFileName(Integer num) {
+        return "/storage/sdcard0/caffe/snapshot_"+(num)+".jpg";
+    }
 
-    public void startRecognition(int captureInterval) {
-        if(timedSnapshot == null) {
+
+    public void startRecognition(int captureInterval, int recognitionPause) {
+        Log.d(TAG, "CameraRecognition.startRecognition [thread " + Thread.currentThread().getName() + "]");
+        if (timedSnapshot == null) {
+            Log.d(TAG, "CameraRecognition.startRecognition new snapshot runnable");
             timedSnapshot = new SnapshotRunnable(captureInterval);
+            timedRecognition = new RecognitionRunnable(recognitionPause);
             handler.post(timedSnapshot);
-        } else {
-            timedSnapshot.setCaptureInterval(captureInterval);
+            handler.post(timedRecognition);
         }
+
+        timedSnapshot.setCaptureInterval(captureInterval);
     }
 
     public void stopRecognition() {
+        Log.d(TAG, "CameraRecognition.stopRecognition [thread "+Thread.currentThread().getName()+"]");
         if(timedSnapshot != null) {
             timedSnapshot.stopRunning();
+        }
+        if(timedRecognition != null) {
+            timedRecognition.stopRunning();
         }
     }
 
@@ -94,9 +92,12 @@ public class CameraRecognition implements CameraSnapshotListener {
 
         @Override
         public void run() {
-            if(!doRun) return;
+            if(!doRun) {
+                Log.d(TAG, "CameraRecognition.SnapshotRunnable.run canceled [thread "+Thread.currentThread().getName()+"]");
+                return;
+            }
             try {
-                Log.d(TAG, "CameraRecognition.SnapshotRunnable.run taking snapshot with interval "+captureInterval);
+                Log.d(TAG, "CameraRecognition.SnapshotRunnable.run taking snapshot with interval "+captureInterval+" [thread "+Thread.currentThread().getName()+"]");
                 camera.takeSnapshot(CameraRecognition.this);
             } finally {
                 handler.postDelayed(this, captureInterval);
@@ -105,6 +106,66 @@ public class CameraRecognition implements CameraSnapshotListener {
 
         public void setCaptureInterval(int captureInterval) {
             this.captureInterval = captureInterval;
+        }
+
+        public void stopRunning() {
+            doRun = false;
+        }
+    }
+
+    private class RecognitionRunnable implements Runnable {
+        private volatile boolean doRun = true;
+        private int recognitionPause;
+
+        public RecognitionRunnable(int recognitionPause) {
+            this.recognitionPause = recognitionPause;
+        }
+
+        @Override
+        public void run() {
+            if(!doRun) {
+                Log.d(TAG, "CameraRecognition.RecognitionRunnable.run canceled [thread "+Thread.currentThread().getName()+"]");
+                return;
+            }
+            if(snapshotNum > 0) {
+                Log.d(TAG, "CameraRecognition.RecognitionRunnable.run recognize snapshot #"+snapshotNum+"  [thread " + Thread.currentThread().getName() + "]");
+                recognitionService.classifyImage(getSnapshotFileName(snapshotNum), new RecognitionListener() {
+                    @Override
+                    public void onRecognitionStart() {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                recognitionListener.onRecognitionStart();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onRecognitionCompleted(final RecognitionResult result) {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                recognitionListener.onRecognitionCompleted(result);
+                            }
+                        });
+                        // start new recognition immediately
+                        handler.postDelayed(RecognitionRunnable.this, recognitionPause);
+                    }
+
+                    @Override
+                    public void onRecognitionCanceled() {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                recognitionListener.onRecognitionCanceled();
+                            }
+                        });
+                    }
+                });
+            } else {
+                Log.d(TAG, "CameraRecognition.RecognitionRunnable.run skip [thread " + Thread.currentThread().getName() + "]");
+                handler.postDelayed(this, (int) (timedSnapshot.captureInterval*1.5f));
+            }
         }
 
         public void stopRunning() {
