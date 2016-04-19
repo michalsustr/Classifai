@@ -53,6 +53,16 @@ public class RecognitionResult {
         return stringBuffer.toString();
     }
 
+    public String top5toString() {
+        StringBuilder stringBuffer = new StringBuilder();
+        Integer[] top5idx = getTopKIndices(5);
+        for (int i = 0; i< 5; i++) {
+            stringBuffer.append(class2label[top5idx[i]])
+                    .append(": ").append(String.format("%.2f", confidenceScore[top5idx[i]])).append("; ");
+        }
+        return stringBuffer.toString();
+    }
+
     public Float getFPS() {
         return (float) (1000.0 / executionTime);
     }

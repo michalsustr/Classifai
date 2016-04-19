@@ -11,7 +11,6 @@ import com.classifai.R;
  * Created by Michal Sustr [michal.sustr@gmail.com] on 4/15/16.
  */
 public class CroppedCameraPreview extends ViewGroup {
-    private static final String LOG_TAG = "CroppedCameraPreview";
     private TextureView textureView;
     private int cameraDisplayWidth;
     private int cameraDisplayHeight;

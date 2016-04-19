@@ -5,6 +5,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
+import android.media.MediaRecorder;
 import android.util.Log;
 
 import com.classifai.R;
@@ -25,28 +26,34 @@ import rx.functions.Func1;
  * Created by Michal Sustr [michal.sustr@gmail.com] on 4/8/16.
  */
 public class Camera {
-    private static final String LOG_TAG = "RxCamera";
+    private static final String TAG = "classifai";
 
     private final Context context;
-    private final CroppedCameraPreview cameraPreview;
+    private CroppedCameraPreview cameraPreview;
     private RxCamera camera;
     private android.hardware.Camera.Size cameraSize;
-    private int cameraMinFPS;
-    private int cameraMaxFPS;
+    private MediaRecorder recorder;
 
-
-    private int cameraNativeWidth;
-    private int cameraNativeHeight;
-    private int cameraDisplayWidth;
-    private int cameraDisplayHeight;
-    private int captureCropWidth;
-    private int captureCropHeight;
+    private final int cameraMinFPS;
+    private final int cameraMaxFPS;
+    private final int cameraNativeWidth;
+    private final int cameraNativeHeight;
+    private final int cameraDisplayWidth;
+    private final int cameraDisplayHeight;
+    private final int captureCropWidth;
+    private final int captureCropHeight;
     private final int captureSaveWidth;
     private final int captureSaveHeight;
 
     public Camera(Context context, CroppedCameraPreview textureView) {
         this.cameraPreview = textureView;
         this.context = context;
+
+//        recorder = new MediaRecorder();
+//        recorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);
+//        recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+//        recorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
+//        recorder.setOutputFile("/storage/sdcard0/caffe/video.mp4");
 
         // load settings
         cameraNativeWidth = context.getResources().getInteger(R.integer.cameraNativeWidth);
@@ -70,22 +77,23 @@ public class Camera {
                 setPreviewFormat(ImageFormat.YUY2).
                 setHandleSurfaceEvent(true).
                 get();
-        Log.d(LOG_TAG, "config: " + config);
+        Log.d(TAG, "Camera.openCamera config: " + config);
 
         RxCamera.open(context, config).flatMap(new Func1<RxCamera, Observable<RxCamera>>() {
             @Override
             public Observable<RxCamera> call(RxCamera rxCamera) {
-                Log.d(LOG_TAG, "isopen: " + rxCamera.isOpenCamera() + ", thread: " + Thread.currentThread());
+                Log.d(TAG, "Camera.openCamera isopen: " + rxCamera.isOpenCamera() + ", thread: " + Thread.currentThread());
                 camera = rxCamera;
-
                 cameraSize = camera.getNativeCamera().getParameters().getPreviewSize();
+//                recorder.setCamera(camera.getNativeCamera());
+
                 return rxCamera.bindTexture(cameraPreview.getTextureView());
 //                return rxCamera.bindTexture(cameraPreview);
             }
         }).flatMap(new Func1<RxCamera, Observable<RxCamera>>() {
             @Override
             public Observable<RxCamera> call(RxCamera rxCamera) {
-                Log.d(LOG_TAG, "isbindsurface: " + rxCamera.isBindSurface() + ", thread: " + Thread.currentThread());
+                Log.d(TAG, "Camera.openCamera isbindsurface: " + rxCamera.isBindSurface() + ", thread: " + Thread.currentThread());
                 return rxCamera.startPreview();
             }
         }).observeOn(AndroidSchedulers.mainThread()).subscribe(new Subscriber<RxCamera>() {
@@ -96,13 +104,13 @@ public class Camera {
 
             @Override
             public void onError(Throwable e) {
-                Log.e(LOG_TAG, "open camera error: " + e.getMessage());
+                Log.e(TAG, "Camera.openCamera open camera error: " + e.getMessage());
             }
 
             @Override
             public void onNext(final RxCamera rxCamera) {
                 camera = rxCamera;
-                Log.d(LOG_TAG, "open camera success: " + camera);
+                Log.d(TAG, "Camera.openCamera open camera success: " + camera);
             }
         });
     }
@@ -112,7 +120,7 @@ public class Camera {
             camera.closeCameraWithResult().subscribe(new Action1<Boolean>() {
                 @Override
                 public void call(Boolean aBoolean) {
-                    Log.d(LOG_TAG, "close camera finished, success: " + aBoolean);
+                    Log.d(TAG, "Camera.closeCamera close camera finished, success: " + aBoolean);
                 }
             });
         }
@@ -172,7 +180,7 @@ public class Camera {
 
 
     public void takeSnapshot(final CameraSnapshotListener listener) {
-        Log.d(LOG_TAG, "try takeSnapshot");
+        Log.d(TAG, "Camera.takeSnapshot");
 
         android.hardware.Camera.Size mSize = camera.getNativeCamera().getParameters().getPreviewSize();
         final int nativeWidth = mSize.width;
@@ -181,8 +189,8 @@ public class Camera {
         camera.request().oneShotRequest().subscribe(new Action1<RxCameraData>() {
             @Override
             public void call(RxCameraData rxCameraData) {
-                Log.d(LOG_TAG, "call takeSnapshot");
-                Log.d(LOG_TAG, "data of length " + rxCameraData.cameraData.length);
+                Log.d(TAG, "Camera.takeSnapshot call takeSnapshot");
+                Log.d(TAG, "Camera.takeSnapshot data of length " + rxCameraData.cameraData.length);
                 // convert to something normal than the weird camera format, and get proper capture square
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 YuvImage yuv = new YuvImage(rxCameraData.cameraData, ImageFormat.YUY2, nativeWidth, nativeHeight, null);
@@ -197,5 +205,18 @@ public class Camera {
                 listener.processCapturedJpeg(bytes);
             }
         });
+    }
+
+    public void startCapturingVideo() {
+//        try {
+//            recorder.prepare();
+//            recorder.start();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+    }
+
+    public void stopCapturingVideo() {
+//        recorder.stop();
     }
 }

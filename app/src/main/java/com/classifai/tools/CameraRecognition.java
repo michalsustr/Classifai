@@ -16,7 +16,7 @@ import java.io.IOException;
  * Created by Michal Sustr [michal.sustr@gmail.com] on 4/15/16.
  */
 public class CameraRecognition implements CameraSnapshotListener {
-    private static final String LOG_TAG = "CameraRecognition";
+    private static final String TAG = "classifai";
     private final Camera camera;
     private final RecognitionService recognitionService;
     private final RecognitionListener recognitionListener;
@@ -60,10 +60,11 @@ public class CameraRecognition implements CameraSnapshotListener {
             FileOutputStream snapshot = new FileOutputStream(snapshotFile);
             snapshot.write(bytes);
             snapshot.close();
-            Log.d(LOG_TAG, "saved takeSnapshot");
+            Log.d(TAG, "CameraRecognition.processCapturedJpeg saved snapshot to "+snapshotFile);
 
             recognitionService.classifyImage(snapshotFile, recognitionListener);
         } catch (IOException e) {
+            Log.e(TAG, "CameraRecognition.processCapturedJpeg error writing: "+e);
             e.printStackTrace();
         }
     }
@@ -95,7 +96,7 @@ public class CameraRecognition implements CameraSnapshotListener {
         public void run() {
             if(!doRun) return;
             try {
-                Log.d(LOG_TAG, "taking snapshot with interval "+captureInterval);
+                Log.d(TAG, "CameraRecognition.SnapshotRunnable.run taking snapshot with interval "+captureInterval);
                 camera.takeSnapshot(CameraRecognition.this);
             } finally {
                 handler.postDelayed(this, captureInterval);

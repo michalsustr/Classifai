@@ -19,7 +19,7 @@ import java.util.Scanner;
  * Created by Michal Sustr [michal.sustr@gmail.com] on 4/8/16.
  */
 public class RecognitionService {
-    private static final String LOG_TAG = "CaffeService";
+    private static final String TAG = "classifai";
     private final CaffeMobile caffeMobile;
     private final Context context;
     private CNNTask cnnTask;
@@ -76,6 +76,7 @@ public class RecognitionService {
             }
             class2label = lines.toArray(new String[0]);
         } catch (IOException e) {
+            Log.e(TAG, "RecognitionService.loadLabels error reading: "+e);
             e.printStackTrace();
         }
     }
@@ -89,7 +90,7 @@ public class RecognitionService {
         if(cnnTask != null) {
             if(cnnTask.getStatus() == AsyncTask.Status.RUNNING
             || cnnTask.getStatus() == AsyncTask.Status.PENDING) {
-                Log.i(LOG_TAG, "classifyImage asyncTask canceled "+cnnTask );
+                Log.i(TAG, "RecognitionService.classifyImage asyncTask canceled "+cnnTask );
                 cnnTask.cancel(true);
             }
             cnnTask = null;
@@ -123,18 +124,18 @@ public class RecognitionService {
         @Override
         protected RecognitionResult doInBackground(String... strings) {
             startTime = SystemClock.uptimeMillis();
-            Log.i(LOG_TAG, "started processing");
+            Log.i(TAG, "RecognitionService.CNNTask.doInBackground started processing");
             RecognitionResult result = new RecognitionResult(
                 caffeMobile.getConfidenceScore(strings[0]), class2label);
-            Log.i(LOG_TAG, "done processing");
+            Log.i(TAG, "RecognitionService.CNNTask.doInBackground done processing");
             return result;
         }
 
         @Override
         protected void onPostExecute(RecognitionResult result) {
             long executionTime = SystemClock.uptimeMillis() - startTime;
-            Log.i(LOG_TAG, String.format("elapsed wall time: %d ms", executionTime));
-            Log.i(LOG_TAG, "Result: "+result);
+            Log.i(TAG, "RecognitionService.CNNTask.onPostExecute "+String.format("elapsed wall time: %d ms", executionTime));
+            Log.i(TAG, "RecognitionService.CNNTask.onPostExecute top5 result: "+result.top5toString());
 
             lastResult = result;
             result.setExecutionTime(executionTime);
@@ -147,7 +148,7 @@ public class RecognitionService {
 
         @Override
         protected void onCancelled() {
-            Log.i(LOG_TAG, "onCancelled");
+            Log.i(TAG, "RecognitionService.CNNTask.onCancelled");
             listener.onRecognitionCanceled();
         }
     }

@@ -23,7 +23,7 @@ import java.util.TimerTask;
 
 
 public class MainActivity extends Activity implements RecognitionListener {
-    private static final String LOG_TAG = "MainActivity";
+    private static final String TAG = "classifai";
 
     private static final String CAFFE_MODEL_DEPLOY  = "/storage/sdcard0/caffe/gnet_full.prototxt";
     private static final String CAFFE_MODEL_WEIGHTS = "/storage/sdcard0/caffe/gnet.caffemodel";
@@ -52,7 +52,7 @@ public class MainActivity extends Activity implements RecognitionListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(LOG_TAG, "created");
+        Log.d(TAG, "MainActivity.onCreate");
         setContentView(R.layout.activity_main);
 
         scoreLabel = (TextView) findViewById(R.id.scoreLabel);
@@ -78,7 +78,7 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     @Override
     protected void onPostResume() {
-        Log.d(LOG_TAG, "onPostResume");
+        Log.d(TAG, "MainActivity.onPostResume");
         circularProgressBar.setProgress(0);
         scoreLabel.setText("Loading up model, please wait...");
 
@@ -130,7 +130,7 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     @Override
     protected void onPause() {
-        Log.d(LOG_TAG, "onPause");
+        Log.d(TAG, "MainActivity.onPause");
         super.onPause();
         cameraRecognition.stopRecognition();
         camera.closeCamera();
@@ -139,21 +139,23 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     public void onLightButtonClicked(View view) {
         if(lightOn) {
-            Log.d(LOG_TAG, "onLightButtonClicked turn off");
+            Log.d(TAG, "MainActivity.onLightButtonClicked turn off");
             lightOn = false;
-            camera.turnLightOff();
+//            camera.turnLightOff();
+            camera.startCapturingVideo();
             lightBtn.setBackground(getDrawable(R.drawable.off));
         } else {
-            Log.d(LOG_TAG, "onLightButtonClicked turn on");
+            Log.d(TAG, "MainActivity.onLightButtonClicked turn on");
             lightOn = true;
-            camera.turnLightOn();
+            camera.stopCapturingVideo();
+//            camera.turnLightOn();
             lightBtn.setBackground(getDrawable(R.drawable.on));
         }
     }
 
     @Override
     public void onRecognitionStart() {
-        Log.d(LOG_TAG, "onRecognitionStart");
+        Log.d(TAG, "MainActivity.onRecognitionStart");
 
         circularProgressBar.setProgress(0);
         circularProgressBar.setProgressWithAnimation(95, captureInterval);
@@ -161,7 +163,7 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     @Override
     public void onRecognitionCompleted(RecognitionResult result) {
-        Log.d(LOG_TAG, "onRecognitionCompleted");
+        Log.d(TAG, "MainActivity.onRecognitionCompleted");
 
         Integer[] top5 = result.getTopKIndices(5);
         StringBuilder show = new StringBuilder();
