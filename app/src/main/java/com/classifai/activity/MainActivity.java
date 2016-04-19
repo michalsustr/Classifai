@@ -31,6 +31,7 @@ public class MainActivity extends Activity implements RecognitionListener {
 
     private TextView fpsLabel;
     private TextView scoreLabel;
+    private TextView statusText;
     private ImageButton lightBtn;
     private CroppedCameraPreview cameraPreview;
     private RelativeLayout layout;
@@ -56,6 +57,7 @@ public class MainActivity extends Activity implements RecognitionListener {
         setContentView(R.layout.activity_main);
 
         scoreLabel = (TextView) findViewById(R.id.scoreLabel);
+        statusText = (TextView) findViewById(R.id.statusText);
         fpsLabel   = (TextView) findViewById(R.id.fpsLabel);
 //        computingProgress = (ProgressBar) findViewById(R.id.computing_progress);
         lightBtn = (ImageButton) findViewById(R.id.btnLight);
@@ -80,7 +82,7 @@ public class MainActivity extends Activity implements RecognitionListener {
     protected void onPostResume() {
         Log.d(TAG, "MainActivity.onPostResume");
         circularProgressBar.setProgress(0);
-        scoreLabel.setText("Loading up model, please wait...");
+        statusText.setText(getString(R.string.loading_model_wait));
 
         // This is kind of hacky, but I don't know how to do it otherwise to initialize
         // the camera so the stream can be viewed.
@@ -112,7 +114,8 @@ public class MainActivity extends Activity implements RecognitionListener {
                         @Override
                         public void onRecognitionCompleted(RecognitionResult result) {
                             captureInterval = (int) (result.getExecutionTime() * 2.0);
-                            scoreLabel.setText("Model is now loaded, processing runs every " + String.format("%.1f", (captureInterval / 1000.0)) + "sec");
+                            statusText.setText(String.format(getString(R.string.model_loaded_text),
+                                (captureInterval / 1000.0)) + "sec");
                             fpsLabel.setText("FPS: " + String.format("%.2f", result.getFPS()));
                             cameraRecognition.startRecognition(captureInterval);
                         }
@@ -177,6 +180,7 @@ public class MainActivity extends Activity implements RecognitionListener {
         circularProgressBar.setProgressWithAnimation(100, 300);
         fpsLabel.setText("FPS: " + String.format("%.2f", result.getFPS()));
         scoreLabel.setText(show);
+        statusText.setText("");
     }
 
     @Override

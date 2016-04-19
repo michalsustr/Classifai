@@ -45,6 +45,17 @@
         />
 
     <TextView
+        android:id="@+id/statusText"
+        android:layout_width="@dimen/cameraDisplayWidth"
+        android:gravity="center"
+        android:textSize="20dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        />
+
+    <TextView
         android:id="@+id/fpsLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Classifai</string>
+    <string name="loading_model_wait">Loading up model, please wait…</string>
+    <string name="model_loaded_text">Model is now loaded, processing runs every %.2f sec</string>
 </resources>
