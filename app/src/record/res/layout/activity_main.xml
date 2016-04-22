@@ -8,22 +8,11 @@
                 android:id="@+id/layout"
                 android:windowSoftInputMode="stateHidden">
 
-    <EditText
-        android:layout_width="@dimen/cameraDisplayWidth"
-        android:layout_height="wrap_content"
-        android:id="@+id/labelText"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true"
-        android:text="label"
-        />
-
-
     <com.classifai.tools.camera.CroppedCameraPreview
         android:layout_width="@dimen/cameraDisplayWidth"
         android:layout_height="@dimen/cameraDisplayHeight"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="70dp"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/labelText"
         android:background="@android:color/black"
         android:id="@+id/preview_surface"
         />
@@ -33,10 +22,30 @@
         android:layout_height="@dimen/cameraDisplayHeight"
         android:background="@drawable/alpha_cover"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/labelText"
         android:id="@+id/alpha"
+        android:layout_marginTop="70dp"
+        />
+
+    <AutoCompleteTextView
+        android:layout_width="500px"
+        android:layout_height="35dp"
+        android:id="@+id/labelText"
+        android:layout_marginTop="20dp"
+        android:layout_alignLeft="@id/preview_surface"
+        android:text="label"
+        />
+
+    <ImageView
+        android:layout_width="64px"
+        android:layout_height="64px"
+        android:background="@drawable/question_mark"
+        android:layout_alignRight="@id/preview_surface"
         android:layout_marginTop="20dp"
         />
+
+
+
+
 
 
     <Button
