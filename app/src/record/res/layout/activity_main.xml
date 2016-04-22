@@ -36,11 +36,14 @@
         />
 
     <ImageView
+        android:id="@+id/labelPreview"
         android:layout_width="64px"
         android:layout_height="64px"
-        android:background="@drawable/question_mark"
+        android:src="@drawable/question_mark"
         android:layout_alignRight="@id/preview_surface"
         android:layout_marginTop="20dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
         />
 
 

@@ -2,8 +2,11 @@ package com.classifai.activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -12,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.classifai.R;
@@ -33,6 +37,7 @@ public class MainActivity extends Activity {
     private AutoCompleteTextView labelText;
     private TextView capturedFrames;
     private Button recordBtn;
+    private ImageView labelPreview;
 
     private Camera camera;
     private boolean isResumed = false;
@@ -42,6 +47,7 @@ public class MainActivity extends Activity {
     private int numRecordings = 0;
     private boolean isRecording = false;
     private CharSequence labelName;
+
 
 
     @Override
@@ -56,6 +62,7 @@ public class MainActivity extends Activity {
         labelText.setThreshold(0);
         capturedFrames = (TextView) findViewById(R.id.capturedFrames);
         recordBtn = (Button) findViewById(R.id.recordBtn);
+        labelPreview = (ImageView) findViewById(R.id.labelPreview);
 
         suggestionsAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, getSuggestions());
@@ -64,7 +71,7 @@ public class MainActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 hideKeyboard();
-                MainActivity.this.onLabelTextChanged(suggestionsAdapter.getItem(position));
+                MainActivity.this.changeLabel(suggestionsAdapter.getItem(position));
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
@@ -77,7 +84,7 @@ public class MainActivity extends Activity {
         labelText.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                MainActivity.this.onLabelTextChanged(s);
+                MainActivity.this.changeLabel(s);
             }
             @Override public void afterTextChanged(Editable s) {}
         });
@@ -103,8 +110,8 @@ public class MainActivity extends Activity {
         return suggestions;
     }
 
-    public void onLabelTextChanged(CharSequence s) {
-        Log.d(TAG, "onLabelTextChanged "+s);
+    public void changeLabel(CharSequence s) {
+        Log.d(TAG, "changeLabel "+s);
         // if is recording, stop
         if(isRecording) {
             stopRecording();
@@ -117,9 +124,29 @@ public class MainActivity extends Activity {
         if(!candidateDir.exists() || !candidateDir.isDirectory()) {
             numRecordings = 0;
         } else {
-            numRecordings = candidateDir.listFiles().length;
+            FileFilter fileFilter = new FileFilter() {
+                public boolean accept(File file) {
+                    return file.isDirectory() && TextUtils.isDigitsOnly(file.getName());
+                }
+            };
+
+            numRecordings = candidateDir.listFiles(fileFilter).length;
         }
-        updateInfo();
+
+        // set up preview
+        File preview = new File(SAVE_DIR +"/"+s+"/preview.png");
+        if(preview.exists()) {
+            Bitmap bmp = BitmapFactory.decodeFile(preview.getAbsolutePath());
+            labelPreview.setImageBitmap(bmp);
+            Log.d(TAG, "changeLabel update label preview");
+        } else {
+            Bitmap bmp = BitmapFactory.decodeResource(getResources(),
+                    R.drawable.question_mark);
+            labelPreview.setImageBitmap(bmp);
+            Log.d(TAG, "changeLabel update label no preview");
+        }
+
+        capturedFrames.setText(String.format("%d frames\n%d recordings", numFrames, numRecordings));
     }
 
     public void onRecordClick(View view) {
@@ -149,13 +176,6 @@ public class MainActivity extends Activity {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
-
-    private void updateInfo() {
-        capturedFrames.setText(String.format("%d frames\n%d recordings", numFrames, numRecordings));
-    }
-
-
-
 
     @Override
     protected void onPostResume() {
