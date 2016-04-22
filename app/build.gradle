@@ -17,6 +17,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+        recognize {
+            applicationId "com.classifai.recognize"
+        }
+        record {
+            applicationId "com.classifai.record"
+        }
+    }
 }
 
 dependencies {
