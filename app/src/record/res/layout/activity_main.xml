@@ -5,7 +5,8 @@
                 android:layout_height="match_parent"
                 tools:context=".MainActivity"
                 android:background="@android:color/white"
-                android:id="@+id/layout">
+                android:id="@+id/layout"
+                android:windowSoftInputMode="stateHidden">
 
     <EditText
         android:layout_width="@dimen/cameraDisplayWidth"
@@ -41,23 +42,26 @@
     <Button
         android:layout_width="@dimen/cameraDisplayWidth"
         android:layout_height="wrap_content"
-        android:id="@+id/toggleRecord"
+        android:id="@+id/recordBtn"
         android:layout_below="@+id/preview_surface"
         android:layout_marginTop="20dp"
         android:layout_alignLeft="@+id/preview_surface"
         android:layout_alignStart="@+id/preview_surface"
         android:text="@string/start_recording"
-        android:padding="20dp"
+        android:paddingBottom="20dp"
+        android:paddingTop="20dp"
+        android:drawableLeft="@drawable/start"
+        android:onClick="onRecordClick"
         />
 
     <TextView
         android:layout_width="200px"
         android:layout_height="wrap_content"
         android:id="@+id/capturedFrames"
-        android:layout_below="@+id/toggleRecord"
+        android:layout_below="@+id/recordBtn"
         android:layout_marginTop="10dp"
         android:layout_alignLeft="@+id/preview_surface"
-        android:text="0 frames"
+        android:text="0 frames\n0 recordings"
         android:padding="10dp"
         />
 
@@ -65,10 +69,11 @@
         android:layout_width="350px"
         android:layout_height="wrap_content"
         android:id="@+id/acceleration"
-        android:layout_below="@+id/toggleRecord"
+        android:layout_below="@+id/recordBtn"
         android:layout_marginTop="10dp"
         android:layout_alignRight="@+id/preview_surface"
         android:text="acc"
+        android:gravity="center"
         android:background="@android:color/holo_green_dark"
         android:padding="10dp"
         />
