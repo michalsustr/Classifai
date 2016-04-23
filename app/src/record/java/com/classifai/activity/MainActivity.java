@@ -85,6 +85,7 @@ public class MainActivity extends Activity implements CameraSnapshotListener {
             @Override
             public void onClick(View v) {
                 stopRecording();
+                labelText.showDropDown();
             }
         });
         labelText.addTextChangedListener(new TextWatcher() {
