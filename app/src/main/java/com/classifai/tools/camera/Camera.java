@@ -1,6 +1,8 @@
 package com.classifai.tools.camera;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -44,6 +46,7 @@ public class Camera {
     private final int captureCropHeight;
     private final int captureSaveWidth;
     private final int captureSaveHeight;
+    private int captureJpegQuality = 50;
 
     public Camera(Context context, CroppedCameraPreview textureView) {
         this.cameraPreview = textureView;
@@ -189,20 +192,23 @@ public class Camera {
         camera.request().oneShotRequest().subscribe(new Action1<RxCameraData>() {
             @Override
             public void call(RxCameraData rxCameraData) {
-                Log.d(TAG, "Camera.takeSnapshot call takeSnapshot [thread "+Thread.currentThread().getName()+"]");
-                Log.d(TAG, "Camera.takeSnapshot data of length " + rxCameraData.cameraData.length + " [thread "+Thread.currentThread().getName()+"]");
+                Log.d(TAG, "Camera.takeSnapshot call takeSnapshot [thread " + Thread.currentThread().getName() + "]");
+                Log.d(TAG, "Camera.takeSnapshot data of length " + rxCameraData.cameraData.length + " [thread " + Thread.currentThread().getName() + "]");
                 // convert to something normal than the weird camera format, and get proper capture square
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 YuvImage yuv = new YuvImage(rxCameraData.cameraData, ImageFormat.YUY2, nativeWidth, nativeHeight, null);
 
                 int offsetA = (nativeWidth - captureCropWidth) / 2;
-                int offsetB = (nativeHeight- captureCropHeight) / 2;
+                int offsetB = (nativeHeight - captureCropHeight) / 2;
                 int cropW = captureCropWidth;
                 int cropH = captureCropHeight;
-                yuv.compressToJpeg(new Rect(offsetA, offsetB, cropW+offsetA, cropH+offsetB), 100, out);
-
+                yuv.compressToJpeg(new Rect(offsetA, offsetB, cropW + offsetA, cropH + offsetB), captureJpegQuality, out);
                 byte[] bytes = out.toByteArray();
-                listener.processCapturedJpeg(bytes);
+
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(),
+                        rxCameraData.rotateMatrix, false);
+                listener.processCapturedJpeg(bitmap);
             }
         });
     }
@@ -219,4 +225,13 @@ public class Camera {
     public void stopCapturingVideo() {
 //        recorder.stop();
     }
+
+    public int getCaptureJpegQuality() {
+        return captureJpegQuality;
+    }
+
+    public void setCaptureJpegQuality(int captureJpegQuality) {
+        this.captureJpegQuality = captureJpegQuality;
+    }
+
 }

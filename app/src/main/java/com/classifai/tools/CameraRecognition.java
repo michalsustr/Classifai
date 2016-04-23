@@ -1,6 +1,7 @@
 package com.classifai.tools;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.util.Log;
 
@@ -10,6 +11,7 @@ import com.classifai.tools.recognition.RecognitionListener;
 import com.classifai.tools.recognition.RecognitionResult;
 import com.classifai.tools.recognition.RecognitionService;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -41,11 +43,13 @@ public class CameraRecognition implements CameraSnapshotListener {
     }
 
     @Override
-    public void processCapturedJpeg(byte[] bytes) {
+    public void processCapturedJpeg(Bitmap bitmap) {
         try {
             String snapshotFile = getSnapshotFileName(snapshotNum++);
-            FileOutputStream snapshot = new FileOutputStream(snapshotFile);
-            snapshot.write(bytes);
+            File file = new File(snapshotFile);
+            file.createNewFile();
+            FileOutputStream snapshot = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, snapshot);
             snapshot.close();
             Log.d(TAG, "CameraRecognition.processCapturedJpeg saved snapshot to " + snapshotFile);
 

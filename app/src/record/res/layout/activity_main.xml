@@ -32,7 +32,10 @@
         android:id="@+id/labelText"
         android:layout_marginTop="20dp"
         android:layout_alignLeft="@id/preview_surface"
-        android:text="label"
+        android:imeOptions="actionDone"
+        android:imeActionLabel="Done"
+        android:hint="Enter label name"
+        android:singleLine="true"
         />
 
     <ImageView
@@ -73,7 +76,7 @@
         android:layout_below="@+id/recordBtn"
         android:layout_marginTop="10dp"
         android:layout_alignLeft="@+id/preview_surface"
-        android:text="0 frames\n0 recordings"
+        android:text="Frames: 0\nRecords: 0\nFPS: 0"
         android:padding="10dp"
         />
 
