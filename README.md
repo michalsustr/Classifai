@@ -4,6 +4,8 @@ An android app for real time object classification. This code can be freely exte
 
 Please see http://michal.sustr.sk/classifai for more information.
 
+There are two flavors: recognize and record
+
 ## License
 Noncommercial license. You may not use this work for commercial purposes.
 
@@ -30,6 +32,8 @@ Recognize:
 - [ ] caffe using GPU? (probably not going to happen)
 
 Record:
+- [X] save snapshots to sd card for different labels
+- [ ] make optimizations to get up to 20FPS
 - [ ] use accelerometer for recording
 - [ ] add clock for recording
 - [ ] check for available space before recording
