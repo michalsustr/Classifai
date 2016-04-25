@@ -24,9 +24,9 @@ import java.util.TimerTask;
 public class MainActivity extends Activity implements RecognitionListener {
     private static final String TAG = "classifai";
 
-    private static final String CAFFE_MODEL_DEPLOY  = "/storage/sdcard0/caffe/gnet_full.prototxt";
+    private static final String CAFFE_MODEL_DEPLOY  = "/storage/sdcard0/caffe/gnet.prototxt";
     private static final String CAFFE_MODEL_WEIGHTS = "/storage/sdcard0/caffe/gnet.caffemodel";
-    private static final String CAFFE_MODEL_LABELS = "/storage/sdcard0/caffe/gnet.txt";
+    private static final String CAFFE_MODEL_LABELS  = "/storage/sdcard0/caffe/gnet.txt";
 
     private TextView fpsLabel;
     private TextView scoreLabel;
@@ -164,6 +164,9 @@ public class MainActivity extends Activity implements RecognitionListener {
     }
 
     @Override
+    /**
+     * @run
+     */
     public void onRecognitionStart() {
         Log.d(TAG, "MainActivity.onRecognitionStart [thread "+Thread.currentThread().getName()+"]");
 

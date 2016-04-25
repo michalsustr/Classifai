@@ -81,24 +81,29 @@ public class RecognitionService {
         }
     }
 
-    public void warmUp(final RecognitionListener warmupListener) {
+    /**
+     * synchronized so that there can't be multiple calls of warmup from other threads until
+     * the execution of this one is finished. Warm-up is intended to run once anyway.
+     */
+    public synchronized void warmUp(final RecognitionListener warmupListener) {
         final String snapshotFile = "/storage/sdcard0/caffe/snapshot_0.jpg";
+        Log.d(TAG, "RecognitionService.warmUp call [thread "+Thread.currentThread().getName()+"]");
 
         // This is warmup
         classifyImage(snapshotFile, new RecognitionListener() {
             @Override
             public void onRecognitionStart() {
-                Log.d(TAG, "RecognitionService.warmUp start");
+                Log.d(TAG, "RecognitionService.warmUp start [thread "+Thread.currentThread().getName()+"]");
             }
 
             @Override
             public void onRecognitionCanceled() {
-                Log.d(TAG, "RecognitionService.warmUp canceled");
+                Log.d(TAG, "RecognitionService.warmUp canceled [thread "+Thread.currentThread().getName()+"]");
             }
 
             @Override
             public void onRecognitionCompleted(RecognitionResult result) {
-                Log.d(TAG, "RecognitionService.warmUp completed");
+                Log.d(TAG, "RecognitionService.warmUp completed [thread "+Thread.currentThread().getName()+"]");
                 // here we get the FPS we should use
                 classifyImage(snapshotFile, warmupListener);
             }
