@@ -1,20 +1,27 @@
 package com.classifai.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -41,6 +48,7 @@ public class MainActivity extends Activity implements CameraSnapshotListener {
     private TextView capturedFrames;
     private Button recordBtn;
     private ImageView labelPreview;
+    private TextView modelText;
 
     private Camera camera;
     private boolean isResumed = false;
@@ -50,10 +58,12 @@ public class MainActivity extends Activity implements CameraSnapshotListener {
     private int numFrames = 0;
     private boolean isRecording = false;
     private CharSequence labelName;
+    private String modelName;
     private SnapshotRunnable timedSnapshot;
     private volatile boolean snapshotProcessed;
     private Long recordingStartTime;
     private boolean doCreatePreview = false;
+
 
 
     @Override
@@ -69,6 +79,7 @@ public class MainActivity extends Activity implements CameraSnapshotListener {
         capturedFrames = (TextView) findViewById(R.id.capturedFrames);
         recordBtn = (Button) findViewById(R.id.recordBtn);
         labelPreview = (ImageView) findViewById(R.id.labelPreview);
+        modelText = (TextView) findViewById(R.id.modelText);
 
         suggestionsAdapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, getSuggestions());
@@ -99,20 +110,24 @@ public class MainActivity extends Activity implements CameraSnapshotListener {
     }
 
     private String[] getSuggestions() {
-        File dir = new File(SAVE_DIR);
+        File dir = new File(SAVE_DIR + "/" + modelName);
         FileFilter fileFilter = new FileFilter() {
             public boolean accept(File file) {
                 return file.isDirectory();
             }
         };
         File[] dirs = dir.listFiles(fileFilter);
+        int dirsLength = 0;
+        if(dirs != null) {
+            dirsLength = dirs.length;
+        }
         String[] staticSuggestions = getResources().getStringArray(R.array.label_suggestions);
-        String[] suggestions = new String[staticSuggestions.length + dirs.length];
-        for (int i = 0; i < dirs.length; i++) {
+        String[] suggestions = new String[staticSuggestions.length + dirsLength];
+        for (int i = 0; i < dirsLength; i++) {
             suggestions[i] = dirs[i].getName();
         }
-        for (int i = dirs.length; i < staticSuggestions.length + dirs.length; i++) {
-            suggestions[i] = staticSuggestions[i-dirs.length];
+        for (int i = dirsLength; i < staticSuggestions.length + dirsLength; i++) {
+            suggestions[i] = staticSuggestions[i-dirsLength];
         }
         return suggestions;
     }
@@ -153,7 +168,7 @@ public class MainActivity extends Activity implements CameraSnapshotListener {
     }
 
     private int getNumRecordings(CharSequence labelName) {
-        File candidateDir = new File(SAVE_DIR +"/"+labelName);
+        File candidateDir = new File(SAVE_DIR +"/"+modelName+"/"+labelName);
         if(!candidateDir.exists() || !candidateDir.isDirectory()) {
             return 0;
         }
@@ -185,6 +200,7 @@ public class MainActivity extends Activity implements CameraSnapshotListener {
     private void initRecording() {
         Log.d(TAG, "MainActivity.initRecording");
         isRecording = false;
+        updateModelName(getString(R.string.default_model_name));
         recordBtn.setText(getString(R.string.start_recording));
         recordBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.start, 0,0,0);
     }
@@ -207,7 +223,7 @@ public class MainActivity extends Activity implements CameraSnapshotListener {
         }
 
         // create dirs if necessary
-        new File(SAVE_DIR +"/"+labelName+"/"+numRecordings+"/").mkdirs();
+        new File(SAVE_DIR +"/"+modelName+"/"+labelName+"/"+numRecordings+"/").mkdirs();
 
         // manage creating preview
         doCreatePreview = !doesLabelPreviewExist();
@@ -260,11 +276,11 @@ public class MainActivity extends Activity implements CameraSnapshotListener {
     }
 
     private String getSnapshotFileName(int i) {
-        return SAVE_DIR +"/"+labelName+"/"+numRecordings+"/"+i+".jpg";
+        return SAVE_DIR +"/"+modelName+"/"+labelName+"/"+numRecordings+"/"+i+".jpg";
     }
 
     public String getPreviewFileName() {
-        return SAVE_DIR +"/"+labelName+"/preview.jpg";
+        return SAVE_DIR +"/"+modelName+"/"+labelName+"/preview.jpg";
     }
 
     private class SnapshotRunnable implements Runnable {
@@ -349,5 +365,54 @@ public class MainActivity extends Activity implements CameraSnapshotListener {
         isResumed = false;
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.model_name:
+                requestModelName();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void requestModelName() {
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        new AlertDialog.Builder(this)
+            .setTitle("Model name")
+                .setMessage("Specify model name to save data under a different directory on the sd card.")
+                .setView(input)
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    updateModelName(input.getText().toString().trim());
+                }
+            })
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            }).show();
+    }
+
+    private void updateModelName(String modelName) {
+        this.modelName = modelName;
+        modelText.setText("Model: "+ modelName);
+        new File(SAVE_DIR+"/"+modelName).mkdirs();
+        suggestionsAdapter.clear();
+        suggestionsAdapter.addAll(getSuggestions());
+        suggestionsAdapter.notifyDataSetChanged();
+    }
 
 }

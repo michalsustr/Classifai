@@ -93,5 +93,16 @@
         android:padding="10dp"
         />
 
+    <TextView
+        android:layout_width="350px"
+        android:layout_height="wrap_content"
+        android:id="@+id/modelText"
+        android:layout_below="@+id/acceleration"
+        android:layout_marginTop="10dp"
+        android:layout_alignRight="@+id/preview_surface"
+        android:text="@string/default_model_name"
+        android:gravity="center"
+        />
+
 
 </RelativeLayout>

@@ -45,12 +45,13 @@ public class CameraRecognition implements CameraSnapshotListener {
     @Override
     public void processCapturedJpeg(Bitmap bitmap) {
         try {
-            String snapshotFile = getSnapshotFileName(snapshotNum++);
+            String snapshotFile = getSnapshotFileName(snapshotNum);
             File file = new File(snapshotFile);
             file.createNewFile();
             FileOutputStream snapshot = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 50, snapshot);
             snapshot.close();
+            snapshotNum++;
             Log.d(TAG, "CameraRecognition.processCapturedJpeg saved snapshot to " + snapshotFile);
 
         } catch (IOException e) {
