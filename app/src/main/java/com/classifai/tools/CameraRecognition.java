@@ -65,6 +65,10 @@ public class CameraRecognition {
         return "/storage/sdcard0/caffe/snapshot_"+(num)+".jpg";
     }
 
+    public String getLastSnapshotRecognized() {
+        return getSnapshotFileName(timedRecognition.lastSnapshotRecognized);
+    }
+
     private class SnapshotRunnable implements Runnable, CameraSnapshotListener {
         private int captureInterval;
         private volatile boolean doRun = true;
@@ -98,6 +102,7 @@ public class CameraRecognition {
                 FileOutputStream snapshot = new FileOutputStream(file);
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 50, snapshot);
                 snapshot.close();
+                timedRecognition.setSnapshotAvailable();
                 Log.d(TAG, "CameraRecognition.processCapturedJpeg saved snapshot to " + snapshotFile + " [thread "+Thread.currentThread().getName()+"]");
 
             } catch (IOException e) {
@@ -122,6 +127,7 @@ public class CameraRecognition {
         private int recognitionPause;
         private volatile boolean doRecognize = true;
         private volatile int lastSnapshotRecognized = -1;
+        private volatile boolean snapshotAvailable = false;
 
         public RecognitionRunnable(int recognitionPause) {
             this.recognitionPause = recognitionPause;
@@ -131,12 +137,21 @@ public class CameraRecognition {
         public void run() {
             while(doRun) {
                 if(!doRecognize) continue;
-                if (snapshotNum <= 0 || lastSnapshotRecognized == snapshotNum) continue;
+                if(!snapshotAvailable) continue;
 
                 // something like a semaphore
                 Log.d(TAG, "CameraRecognition.RecognitionRunnable.run recognize snapshot #" + snapshotNum + "  [thread " + Thread.currentThread().getName() + "]");
                 doRecognize = false;
+                snapshotAvailable = false;
                 lastSnapshotRecognized = snapshotNum;
+
+                try {
+                    Thread.sleep(recognitionPause);
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "CameraRecognition.RecognitionRunnable.run interrupted "+e);
+                    e.printStackTrace();
+                }
+
                 recognitionService.classifyImage(getSnapshotFileName(snapshotNum), new RecognitionListener() {
                     @Override
                     public void onRecognitionStart() {
@@ -158,13 +173,7 @@ public class CameraRecognition {
                         });
 
                         // start new recognition immediately
-//                        Log.d(TAG, "CameraRecognition.RecognitionRunnable.run recognition pause [thread " + Thread.currentThread().getName() + "]");
-//                        try {
-//                            Thread.sleep(recognitionPause);
-//                        } catch (InterruptedException e) {
-//                            Log.e(TAG, "CameraRecognition.RecognitionRunnable.run interrupted "+e);
-//                            e.printStackTrace();
-//                        }
+                        Log.d(TAG, "CameraRecognition.RecognitionRunnable.run recognition pause [thread " + Thread.currentThread().getName() + "]");
                         doRecognize = true;
                     }
 
@@ -185,6 +194,10 @@ public class CameraRecognition {
 
         public void stopRunning() {
             doRun = false;
+        }
+
+        public void setSnapshotAvailable() {
+            snapshotAvailable = true;
         }
     }
 }

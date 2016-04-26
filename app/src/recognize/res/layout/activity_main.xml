@@ -44,6 +44,34 @@
         android:text=""
         />
 
+    <ImageView
+        android:layout_width="128px"
+        android:layout_height="128px"
+        android:layout_toLeftOf="@id/scoreLabel"
+        android:layout_alignTop="@id/scoreLabel"
+        android:layout_marginRight="10dp"
+        android:id="@+id/snapshotImage"
+        />
+
+    <ImageView
+        android:layout_width="128px"
+        android:layout_height="128px"
+        android:layout_toRightOf="@id/scoreLabel"
+        android:layout_alignTop="@id/scoreLabel"
+        android:layout_marginLeft="10dp"
+        android:id="@+id/labelImage"
+        />
+    <TextView
+        android:layout_width="128px"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/labelImage"
+        android:layout_below="@id/labelImage"
+        android:gravity="center"
+        android:layout_marginTop="3dp"
+        android:text="Top 1"
+        android:id="@+id/labelImageText"
+        />
+
     <TextView
         android:id="@+id/statusText"
         android:layout_width="@dimen/cameraDisplayWidth"

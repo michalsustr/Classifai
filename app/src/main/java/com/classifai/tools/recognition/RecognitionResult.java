@@ -1,5 +1,9 @@
 package com.classifai.tools.recognition;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -42,6 +46,17 @@ public class RecognitionResult {
         return class2label[index];
     }
 
+    /**
+     * @param index
+     * @return null|Bitmap
+     */
+    public Bitmap getPreview(int index) {
+        String preview = "/storage/sdcard0/caffe/preview/"+index+".jpg";
+        if(new File(preview).exists()) {
+            return BitmapFactory.decodeFile(preview);
+        }
+        return null;
+    }
 
     @Override
     public String toString() {

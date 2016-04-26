@@ -1,10 +1,13 @@
 package com.classifai.activity;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -35,6 +38,9 @@ public class MainActivity extends Activity implements RecognitionListener {
     private CroppedCameraPreview cameraPreview;
     private RelativeLayout layout;
     private CircleProgress circularProgressBar;
+    private ImageView snapshotImage;
+    private ImageView labelImage;
+    private TextView labelImageText;
 
     private RecognitionService recognitionService;
 
@@ -62,6 +68,9 @@ public class MainActivity extends Activity implements RecognitionListener {
         lightBtn = (ImageButton) findViewById(R.id.btnLight);
         cameraPreview = (CroppedCameraPreview) findViewById(R.id.preview_surface);
         layout = (RelativeLayout)  findViewById(R.id.layout);
+        snapshotImage = (ImageView) findViewById(R.id.snapshotImage);
+        labelImage =  (ImageView) findViewById(R.id.labelImage);
+        labelImageText = (TextView) findViewById(R.id.labelImageText);
 
         recognitionService = new RecognitionService(
                 CAFFE_MODEL_DEPLOY, CAFFE_MODEL_WEIGHTS, CAFFE_MODEL_LABELS, getApplicationContext());
@@ -83,6 +92,9 @@ public class MainActivity extends Activity implements RecognitionListener {
 //        circularProgressBar.animateProgress(2000);
         scoreLabel.setText("");
         statusText.setText(getString(R.string.loading_model_wait));
+        snapshotImage.setVisibility(View.INVISIBLE);
+        labelImageText.setVisibility(View.INVISIBLE);
+        labelImage.setVisibility(View.INVISIBLE);
 
         // This is kind of hacky, but I don't know how to do it otherwise to initialize
         // the camera so the stream can be viewed.
@@ -191,6 +203,18 @@ public class MainActivity extends Activity implements RecognitionListener {
         fpsLabel.setText("FPS: " + String.format("%.2f", result.getFPS()));
         scoreLabel.setText(show);
         statusText.setText("");
+
+        snapshotImage.setVisibility(View.VISIBLE);
+        labelImageText.setVisibility(View.VISIBLE);
+        labelImage.setVisibility(View.VISIBLE);
+        String lastSnapshot = cameraRecognition.getLastSnapshotRecognized();
+        snapshotImage.setImageBitmap(BitmapFactory.decodeFile(lastSnapshot));
+        Bitmap preview = result.getPreview(top5[0]);
+        if(preview == null) {
+            labelImage.setImageDrawable(getDrawable(R.drawable.question_mark));
+        } else {
+            labelImage.setImageBitmap(preview);
+        }
     }
 
     @Override
